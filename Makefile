@@ -1,0 +1,18 @@
+run:
+	ENV=prod go run cmd/init/main.go
+
+dev:
+	ENV=dev go run cmd/init/main.go
+
+test:
+	go test -v ./...
+	go run cmd/test-main.go
+
+create-migrate:
+	migrate create -ext sql -dir ./db/migrations $(name)
+
+prod-db-migrate:
+	ENV=prod go run cmd/migrations/main.go
+
+dev-db-migrate:
+	ENV=dev go run cmd/migrations/main.go

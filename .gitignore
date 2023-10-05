@@ -1,3 +1,9 @@
 bin/
 
 .env
+.env.*
+config.env
+
+db-password.txt
+
+firebase.json

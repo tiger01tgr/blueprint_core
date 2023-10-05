@@ -1,0 +1,1 @@
+ALTER TABLE Users ADD CONSTRAINT uq_users_id UNIQUE (id);
