@@ -1,8 +1,8 @@
 package user
 
 import (
-	userDao "backend/internal/db/dao/user"
-	models "backend/internal/db/models"
+	dao "backend/db/dao/user"
+	models "backend/db/models"
 	"time"
 	"database/sql"
 )
@@ -13,7 +13,7 @@ func GetUsers() {
 }
 
 func GetUserWithId(id int) (*models.User, error) {
-	row, err := userDao.ReadUserWithId(id)
+	row, err := dao.ReadUserWithId(id)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func GetUserWithId(id int) (*models.User, error) {
 }
 
 func GetUserWithEmail(email string) (*models.User, error) {
-	row, err := userDao.ReadUserWithEmail(email)
+	row, err := dao.ReadUserWithEmail(email)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func CreateUser(firstname string, middlename string, lastname string, email stri
 		LastLogin: time.Now(),
 		Deleted: false,
 	}
-	_, err := userDao.CreateUser(u)
+	_, err := dao.CreateUser(u)
 	if err != nil {
 		return err
 	}

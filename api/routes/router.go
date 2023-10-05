@@ -1,9 +1,11 @@
 package routes
 
 import (
+	"backend/api/handlers"
 	"fmt"
 	"net/http"
 	"sync"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -21,9 +23,8 @@ func GetRouter() *chi.Router {
 func InitRouter() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
+	handlers.InitUsersRoutes(r)
+
 	http.ListenAndServe(":3000", r)
 	fmt.Println("Server is running on port 3000")
 }

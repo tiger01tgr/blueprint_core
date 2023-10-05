@@ -1,16 +1,16 @@
-package userDao
+package dao
 
 import (
-	"backend/internal/db"
-	"backend/internal/db/models"
+	"backend/db"
+	"backend/db/models"
 	"database/sql"
 )
 
 func CreateUser(u models.User) (*sql.Result, error) {
 	database := db.GetDB()
 	res, err := database.Exec(
-		"INSERT INTO Users (first_name, middle_name, last_name, email, type_of_user, created_at, last_login)"+
-			" VALUES ($1, $2, $3, $4, $5, $6, $7)",
+		"INSERT INTO Users (first_name, middle_name, last_name, email, type_of_user, created_at, last_login, deleted)"+
+			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 		u.FirstName,
 		u.MiddleName,
 		u.LastName,

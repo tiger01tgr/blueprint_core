@@ -1,22 +1,22 @@
-package auth
+package handlers
 
 import (
-	"backend/internal/services/user"
-	"backend/internal/api/middleware"
+	"backend/services/user"
+	"log"
 	"net/http"
 	"strconv"
+
 	"github.com/go-chi/chi/v5"
 )
 
 func InitUsersRoutes(router chi.Router) {
 	router.Route("/users", func(r chi.Router) {
 		// Middlewares
-		r.Use(middleware.GoogleAuth)
+		//r.Use(middleware.GoogleAuth)
 
 		// Routes
-		// r.Get("/", GetUsers)
-		r.Get("/{id}", GetUserWithId)
-		r.Get("/{email}", GetUserWithEmail)
+		// r.Get("/all", GetUsers)
+		r.Get("/", GetUserWithIdOrEmail)
 		r.Get("/me", GetUserWithSelf)
 		r.Post("/", CreateUser)
 	})
@@ -26,29 +26,33 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetUserWithId(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+func GetUserWithIdOrEmail(w http.ResponseWriter, r *http.Request) {
+	// If ID is given
+	id := r.FormValue("id")
 	idInt, err := strconv.Atoi(id)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	if err == nil {
+		user, err := user.GetUserWithId(idInt)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte(user.String()))
 		return
 	}
-	user, err := user.GetUserWithId(idInt)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.Write([]byte(user.String()))
-}
 
-func GetUserWithEmail(w http.ResponseWriter, r *http.Request) {
-	email := chi.URLParam(r, "email")
-	user, err := user.GetUserWithEmail(email)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+	// If email is given
+	email := r.FormValue("email")
+	if email != "" {
+		user, err := user.GetUserWithEmail(email)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte(user.String()))
 		return
 	}
-	w.Write([]byte(user.String()))
+
+	w.WriteHeader(http.StatusBadRequest)
 }
 
 func GetUserWithSelf(w http.ResponseWriter, r *http.Request) {
@@ -69,6 +73,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	typeOfUser := r.FormValue("typeOfUser")
 	err := user.CreateUser(firstname, middlename, lastname, email, typeOfUser)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
