@@ -4,7 +4,7 @@ import (
 	"backend/api/routes"
 	"backend/config"
 	"backend/db"
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -23,11 +23,11 @@ func main() {
 	if err != nil {
 		panic("Error loading .env file")
 	}
-	fmt.Println(env)
+	log.Println(env)
 	db.GetDB()
 	defer db.GetDB().Close()
-	routes.GetRouter()
 	config.GetFirebase()
-
-	fmt.Println("Server is running.")
+	
+	
+	routes.GetRouter()
 }

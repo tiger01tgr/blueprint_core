@@ -34,6 +34,7 @@ func GetUserWithIdOrEmail(w http.ResponseWriter, r *http.Request) {
 		user, err := user.GetUserWithId(idInt)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
 			return
 		}
 		w.Write([]byte(user.String()))
@@ -46,6 +47,7 @@ func GetUserWithIdOrEmail(w http.ResponseWriter, r *http.Request) {
 		user, err := user.GetUserWithEmail(email)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
 			return
 		}
 		w.Write([]byte(user.String()))
@@ -60,6 +62,7 @@ func GetUserWithSelf(w http.ResponseWriter, r *http.Request) {
 	user, err := user.GetUserWithId(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 	w.Write([]byte(user.String()))
@@ -75,6 +78,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 	w.WriteHeader(http.StatusCreated)

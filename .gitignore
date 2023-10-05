@@ -5,3 +5,5 @@ bin/
 config.env
 
 db-password.txt
+
+firebase.json

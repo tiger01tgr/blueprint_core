@@ -2,7 +2,7 @@ package routes
 
 import (
 	"backend/api/handlers"
-	"fmt"
+	"log"
 	"net/http"
 	"sync"
 
@@ -25,6 +25,6 @@ func InitRouter() {
 	r.Use(middleware.Logger)
 	handlers.InitUsersRoutes(r)
 
+	log.Println("Server is running on port 3000")
 	http.ListenAndServe(":3000", r)
-	fmt.Println("Server is running on port 3000")
 }

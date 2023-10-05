@@ -15,6 +15,7 @@ func GoogleAuth(next http.Handler) http.Handler {
 		if authHeader == "" {
 			// No authorization header provided
 			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("No authorization header provided"))
 			return
 		}
 
@@ -30,6 +31,7 @@ func GoogleAuth(next http.Handler) http.Handler {
 
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Invalid authorization header provided"))
 			return
 		}
 
