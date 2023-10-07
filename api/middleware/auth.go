@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"backend/config"
+	"backend/config/firebase"
 	"context"
 	"net/http"
 	"strings"
@@ -23,7 +23,7 @@ func GoogleAuth(next http.Handler) http.Handler {
 		// so we'll split on the space and grab the token body.
 		token := strings.Split(authHeader, " ")[1]
 
-		fb := config.GetFirebase()
+		fb := firebase.GetFirebase()
 
 		var idToken *auth.Token
 		var err error

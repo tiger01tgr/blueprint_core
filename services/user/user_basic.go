@@ -1,9 +1,8 @@
 package user
 
 import (
-	dao "backend/db/dao/user"
+	dao "backend/db/dao/users"
 	models "backend/db/models"
-	"time"
 	"database/sql"
 )
 
@@ -36,18 +35,8 @@ func GetUserWithEmail(email string) (*models.User, error) {
 	return &u, nil
 }
 
-func CreateUser(firstname string, middlename string, lastname string, email string, typeOfUser string, ) error {
-	u := models.User{
-		FirstName:  firstname,
-		MiddleName: middlename,
-		LastName:   lastname,
-		Email:      email,
-		TypeOfUser: typeOfUser,
-		CreatedAt: time.Now(),
-		LastLogin: time.Now(),
-		Deleted: false,
-	}
-	_, err := dao.CreateUser(u)
+func CreateUser(firstname string, middlename string, lastname string, email string, userType string, ) error {
+	_, err := dao.CreateUser(firstname, middlename, lastname, email, userType)
 	if err != nil {
 		return err
 	}
@@ -62,7 +51,7 @@ func fillUserHelper(row *sql.Row) (models.User, error) {
 		&u.MiddleName,
 		&u.LastName,
 		&u.Email,
-		&u.TypeOfUser,
+		&u.UserType,
 		&u.CreatedAt,
 		&u.LastLogin,
 		&u.Deleted,

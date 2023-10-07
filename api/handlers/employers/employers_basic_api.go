@@ -1,0 +1,130 @@
+package handlers
+
+import (
+	"backend/db/models"
+	employersService "backend/services/employers"
+	"encoding/json"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+)
+
+func InitEmployersRoutes(router chi.Router) {
+	router.Route("/employers", func(r chi.Router) {
+		// Middlewares
+		//r.Use(middleware.GoogleAuth)
+
+		// Routes
+		// r.Get("/all", GetEmployers)
+		r.Get("/", GetEmployers)
+		r.Post("/", CreateEmployer)
+
+	})
+}
+
+type GetEmployersRequest struct {
+	companyIds []uint64
+	industries []string
+	role       []string
+}
+
+type EmployerResponse struct {
+	ID       uint64
+	Name     string
+	Logo     string
+	Industry string
+	IndustryId uint64
+}
+
+type GetEmployersResponse struct {
+	Employers []EmployerResponse `json:"employers"`
+}
+
+func GetEmployers(w http.ResponseWriter, r *http.Request) {
+
+	if r.FormValue("all") == "true" {
+		// Return all employers
+		employers, err := employersService.GetAllEmployers()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		response := GetEmployersResponse{
+			Employers: employersToResponseHelper(employers),
+		}
+
+		// Marshal the response to JSON
+		jsonData, err := json.Marshal(response)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		// Set the content type header and write the JSON response
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
+	}
+
+	// var req GetEmployersRequest
+
+	// decoder := json.NewDecoder(r.Body)
+	// if err := decoder.Decode(&req); err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	w.Write([]byte("Invalid request payload"))
+	// 	return
+	// }
+
+}
+
+func CreateEmployer(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(10 << 20) // 10 MB maximum file size
+	if err != nil {
+		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		return
+	}
+
+	name := r.FormValue("name")
+	logo, _, err := r.FormFile("logo")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	defer logo.Close()
+
+	industryId := r.FormValue("industryId")
+
+	if name == "" || industryId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid request payload"))
+		return
+	}
+
+	err = employersService.CreateEmployer(name, industryId, logo)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+// Converts []models.Employer to []EmployerResponse
+func employersToResponseHelper(employers []models.Employer) []EmployerResponse {
+	var responses []EmployerResponse
+	for _, employer := range employers {
+		response := EmployerResponse{
+			ID:       employer.ID,
+			Name:     employer.Name,
+			Logo:     employer.Logo,
+			Industry: employer.Industry,
+			IndustryId: employer.IndustryId,
+		}
+		responses = append(responses, response)
+	}
+	return responses
+}

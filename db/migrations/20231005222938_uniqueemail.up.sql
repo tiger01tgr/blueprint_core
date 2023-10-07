@@ -1,1 +1,0 @@
-ALTER TABLE Users ADD CONSTRAINT uq_email UNIQUE (email);

@@ -1,7 +1,9 @@
 package routes
 
 import (
-	"backend/api/handlers"
+	usersHandler "backend/api/handlers/users"
+	practiceHandler "backend/api/handlers/practice"
+	employerHandler "backend/api/handlers/employers"
 	"log"
 	"net/http"
 	"sync"
@@ -23,7 +25,9 @@ func GetRouter() *chi.Router {
 func InitRouter() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	handlers.InitUsersRoutes(r)
+	usersHandler.InitUsersRoutes(r)
+	practiceHandler.InitPracticeRoutes(r)
+	employerHandler.InitEmployersRoutes(r)
 
 	log.Println("Server is running on port 3000")
 	http.ListenAndServe(":3000", r)
