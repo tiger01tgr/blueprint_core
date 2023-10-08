@@ -5,6 +5,15 @@ import (
 	"database/sql"
 )
 
+func GetIndustries() (*sql.Rows, error) {
+	db := db.GetDB()
+	rows, err := db.Query("SELECT * FROM Industries")
+	if err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func CreateIndustry(name string) (*sql.Result, error) {
 	db := db.GetDB()
 	res, err := db.Exec(

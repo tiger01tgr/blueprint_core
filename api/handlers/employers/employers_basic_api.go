@@ -5,6 +5,7 @@ import (
 	employersService "backend/services/employers"
 	"encoding/json"
 	"net/http"
+	"mime/multipart"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -18,6 +19,8 @@ func InitEmployersRoutes(router chi.Router) {
 		// r.Get("/all", GetEmployers)
 		r.Get("/", GetEmployers)
 		r.Post("/", CreateEmployer)
+		r.Patch("/", EditEmployer)
+		r.Delete("/", DeleteEmployer)
 
 	})
 }
@@ -29,10 +32,10 @@ type GetEmployersRequest struct {
 }
 
 type EmployerResponse struct {
-	ID       uint64
-	Name     string
-	Logo     string
-	Industry string
+	ID         uint64
+	Name       string
+	Logo       string
+	Industry   string
 	IndustryId uint64
 }
 
@@ -118,13 +121,69 @@ func employersToResponseHelper(employers []models.Employer) []EmployerResponse {
 	var responses []EmployerResponse
 	for _, employer := range employers {
 		response := EmployerResponse{
-			ID:       employer.ID,
-			Name:     employer.Name,
-			Logo:     employer.Logo,
-			Industry: employer.Industry,
+			ID:         employer.ID,
+			Name:       employer.Name,
+			Logo:       employer.Logo,
+			Industry:   employer.Industry,
 			IndustryId: employer.IndustryId,
 		}
 		responses = append(responses, response)
 	}
 	return responses
+}
+
+func EditEmployer(w http.ResponseWriter, r *http.Request) {
+	var logo multipart.File
+	if r.FormValue("isLogoUpdate") == "true" {
+		err := r.ParseMultipartForm(10 << 20) // 10 MB maximum file size
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Unable to parse form or form is too large"))
+			return
+		}
+		logo, _, err = r.FormFile("logo")
+		defer logo.Close()
+		if err != nil && err != http.ErrMissingFile {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+	}
+
+	id := r.FormValue("id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid request payload"))
+		return
+	}
+
+	name := r.FormValue("name")
+
+
+	industryId := r.FormValue("industryId")
+
+	err := employersService.UpdateEmployer(id, name, industryId, logo)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func DeleteEmployer(w http.ResponseWriter, r *http.Request) {
+	id := r.FormValue("id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid request payload"))
+		return
+	}
+
+	err := employersService.DeleteEmployer(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -3,6 +3,7 @@ package s3
 import (
 	"backend/config/s3Client"
 	"context"
+	"fmt"
 	"mime/multipart"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -27,6 +28,7 @@ func uploadFile(key string, contentType string, file multipart.File) (string, er
 	if err != nil {
 		return "", err
 	}
+	url := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", s3Client.BucketName, *result.Key)
 	// The result contains information about the uploaded object, including the key
-	return *result.Key, nil
+	return url, nil
 }
