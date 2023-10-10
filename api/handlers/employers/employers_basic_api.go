@@ -1,27 +1,30 @@
 package handlers
 
 import (
+	"backend/api/middleware"
 	"backend/db/models"
 	employersService "backend/services/employers"
 	"encoding/json"
-	"net/http"
 	"mime/multipart"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
 
 func InitEmployersRoutes(router chi.Router) {
 	router.Route("/employers", func(r chi.Router) {
-		// Middlewares
-		//r.Use(middleware.GoogleAuth)
+		// Public routes
+		r.Group(func(r chi.Router) {
+			r.Get("/", GetEmployers)
+		})
 
-		// Routes
-		// r.Get("/all", GetEmployers)
-		r.Get("/", GetEmployers)
-		r.Post("/", CreateEmployer)
-		r.Patch("/", EditEmployer)
-		r.Delete("/", DeleteEmployer)
-
+		// Admin routes
+		r.Group(func(r chi.Router) {
+			middleware.SuperAdminAuth(r)
+			r.Post("/", CreateEmployer)
+			r.Patch("/", EditEmployer)
+			r.Delete("/", DeleteEmployer)
+		})
 	})
 }
 
@@ -158,7 +161,6 @@ func EditEmployer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := r.FormValue("name")
-
 
 	industryId := r.FormValue("industryId")
 

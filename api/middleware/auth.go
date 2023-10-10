@@ -7,7 +7,19 @@ import (
 	"strings"
 
 	"firebase.google.com/go/auth"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
+	"backend/services/jwt"
 )
+
+func SuperAdminAuth(router chi.Router) {
+	router.Use(jwtauth.Verifier(jwt.GetJWT()))
+	router.Use(jwtauth.Authenticator)
+}
+
+func UserAuth(router chi.Router) {
+	router.Use(GoogleAuth)
+}
 
 func GoogleAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
