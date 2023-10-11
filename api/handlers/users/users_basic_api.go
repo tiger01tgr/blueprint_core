@@ -10,13 +10,12 @@ import (
 )
 
 func InitUsersRoutes(router chi.Router) {
-	router.Route("/users", func(r chi.Router) {
+	router.Route("/api/users", func(r chi.Router) {
 		// Middlewares
 		//r.Use(middleware.GoogleAuth)
 
 		// Routes
-		// r.Get("/all", GetUsers)
-		r.Get("/", GetUserWithIdOrEmail)
+		r.Get("/", GetUser)
 		r.Get("/me", GetUserWithSelf)
 		r.Post("/", CreateUser)
 	})
@@ -26,7 +25,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetUserWithIdOrEmail(w http.ResponseWriter, r *http.Request) {
+func GetUser(w http.ResponseWriter, r *http.Request) {
 	// If ID is given
 	id := r.FormValue("id")
 	idInt, err := strconv.Atoi(id)

@@ -16,3 +16,6 @@ prod-db-migrate:
 
 dev-db-migrate:
 	ENV=dev go run cmd/migrations/main.go
+
+dev-db-rollback-all:
+	ENV=dev go run cmd/dev_rollback_all/main.go

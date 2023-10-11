@@ -2,7 +2,8 @@ package main
 
 import (
 	"backend/api/routes"
-	"backend/config"
+	"backend/config/firebase"
+	"backend/config/s3Client"
 	"backend/db"
 	"log"
 	"os"
@@ -26,8 +27,8 @@ func main() {
 	log.Println(env)
 	db.GetDB()
 	defer db.GetDB().Close()
-	config.GetFirebase()
-	
+	firebase.GetFirebase()
+	s3Client.GetS3()
 	
 	routes.GetRouter()
 }

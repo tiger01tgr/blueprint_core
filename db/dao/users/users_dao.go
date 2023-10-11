@@ -2,23 +2,23 @@ package dao
 
 import (
 	"backend/db"
-	"backend/db/models"
 	"database/sql"
+	"time"
 )
 
-func CreateUser(u models.User) (*sql.Result, error) {
+func CreateUser(firstName, middleName, lastName, email, userType string) (*sql.Result, error) {
 	database := db.GetDB()
 	res, err := database.Exec(
 		"INSERT INTO Users (first_name, middle_name, last_name, email, type_of_user, created_at, last_login, deleted)"+
 			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-		u.FirstName,
-		u.MiddleName,
-		u.LastName,
-		u.Email,
-		u.TypeOfUser,
-		u.CreatedAt,
-		u.LastLogin,
-		u.Deleted,
+		firstName,
+		middleName,
+		lastName,
+		email,
+		userType,
+		time.Now(),
+		time.Now(),
+		false,
 	)
 	return &res, err
 }
@@ -41,18 +41,18 @@ func ReadUserWithEmail(email string) (*sql.Row, error) {
 	return row, nil
 }
 
-func UpdateUserLastLogin(u models.User) (*sql.Result, error) {
+func UpdateUserLastLogin(id int) (*sql.Result, error) {
 	database := db.GetDB()
-	res, err := database.Exec("UPDATE Users SET last_login = $1 WHERE id = $2", u.LastLogin, u.ID)
+	res, err := database.Exec("UPDATE Users SET last_login = $1 WHERE id = $2", time.Now(), id)
 	if err != nil {
 		return &res, err
 	}
 	return &res, nil
 }
 
-func DeleteUser(u models.User) (*sql.Result, error) {
+func DeleteUser(id int) (*sql.Result, error) {
 	database := db.GetDB()
-	res, err := database.Exec("UPDATE Users SET deleted = $1 WHERE id = $2", true, u.ID)
+	res, err := database.Exec("UPDATE Users SET deleted = $1 WHERE id = $2", true, id)
 	if err != nil {
 		return &res, err
 	}
