@@ -10,7 +10,7 @@ import (
 )
 
 func InitUsersRoutes(router chi.Router) {
-	router.Route("/users", func(r chi.Router) {
+	router.Route("/api/users", func(r chi.Router) {
 		// Middlewares
 		//r.Use(middleware.GoogleAuth)
 

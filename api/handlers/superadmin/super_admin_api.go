@@ -7,7 +7,7 @@ import (
 )
 
 func InitSuperAdminRoutes(router chi.Router) {
-	router.Route("/superadmin", func(r chi.Router) {
+	router.Route("/api/superadmin", func(r chi.Router) {
 		r.Post("/login", Login)
 	})
 }

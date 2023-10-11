@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"backend/api/middleware"
+	// "backend/api/middleware"
 	"backend/db/models"
 	employersService "backend/services/employers"
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 )
 
 func InitEmployersRoutes(router chi.Router) {
-	router.Route("/employers", func(r chi.Router) {
+	router.Route("/api/employers", func(r chi.Router) {
 		// Public routes
 		r.Group(func(r chi.Router) {
 			r.Get("/", GetEmployers)
@@ -20,7 +20,7 @@ func InitEmployersRoutes(router chi.Router) {
 
 		// Admin routes
 		r.Group(func(r chi.Router) {
-			middleware.SuperAdminAuth(r)
+			// middleware.SuperAdminAuth(r)
 			r.Post("/", CreateEmployer)
 			r.Patch("/", EditEmployer)
 			r.Delete("/", DeleteEmployer)
@@ -40,6 +40,7 @@ type EmployerResponse struct {
 	Logo       string
 	Industry   string
 	IndustryId uint64
+	Deleted   bool
 }
 
 type GetEmployersResponse struct {
@@ -57,9 +58,7 @@ func GetEmployers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		response := GetEmployersResponse{
-			Employers: employersToResponseHelper(employers),
-		}
+		response := employersToResponseHelper(employers)
 
 		// Marshal the response to JSON
 		jsonData, err := json.Marshal(response)
@@ -129,6 +128,7 @@ func employersToResponseHelper(employers []models.Employer) []EmployerResponse {
 			Logo:       employer.Logo,
 			Industry:   employer.Industry,
 			IndustryId: employer.IndustryId,
+			Deleted:   employer.Deleted,
 		}
 		responses = append(responses, response)
 	}

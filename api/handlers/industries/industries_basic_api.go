@@ -3,13 +3,15 @@ package handlers
 import (
 	industryService "backend/services/industries"
 	"encoding/json"
+
+	//"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
 
 func InitIndustriesRoutes(router chi.Router) {
-	router.Route("/industries", func(r chi.Router) {
+	router.Route("/api/industries", func(r chi.Router) {
 		// Middlewares
 		//r.Use(middleware.GoogleAuth)
 

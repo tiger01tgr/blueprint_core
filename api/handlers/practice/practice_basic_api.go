@@ -7,7 +7,7 @@ import (
 )
 
 func InitPracticeRoutes(router chi.Router) {
-	router.Route("/practice", func(r chi.Router) {
+	router.Route("/api/practice", func(r chi.Router) {
 		r.Get("/", GetQuestionSets)
 		r.Post("/", CreateQuestionSet)
 
