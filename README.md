@@ -3,7 +3,6 @@
 
 ### Running blueprint_core
 
-0. Make sure you have all of the dependencies using `go mod download`
+0. Install all of the dependencies using `go mod download`
 
-1. `go run cmd/main.go`
 
