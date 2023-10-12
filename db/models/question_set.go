@@ -5,22 +5,22 @@ import (
 )
 
 type QuestionSet struct {
-	id         uint64
-	employerId uint64
-	role       string
-	interviewType string
-	questions  []uint64
-	created_at string
-	deleted    bool
+	ID         uint64
+	Name	   string
+	EmployerId uint64
+	RoleId       uint64
+	InterviewType string
+	CreatedAt string
+	Deleted    bool
 }
 
 func (qs QuestionSet) String() string {
 	return "QuestionSet{" +
-		"id: " + fmt.Sprint(qs.id) +
-		", employerId: " + fmt.Sprint(qs.employerId) +
-		", role: " + qs.role +
-		", interviewType: " + qs.interviewType +
-		", questions: " + fmt.Sprint(qs.questions) +
-		", created_at: " + qs.created_at +
+		"id: " + fmt.Sprint(qs.ID) +
+		", employerId: " + fmt.Sprint(qs.EmployerId) +
+		", roleId: " + fmt.Sprint(qs.RoleId) +
+		", interviewType: " + qs.InterviewType +
+		", createdAt: " + qs.CreatedAt +
+		", deleted: " + fmt.Sprint(qs.Deleted) +
 		"}"
 }

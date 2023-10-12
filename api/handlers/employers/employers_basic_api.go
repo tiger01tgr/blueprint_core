@@ -28,12 +28,6 @@ func InitEmployersRoutes(router chi.Router) {
 	})
 }
 
-type GetEmployersRequest struct {
-	companyIds []uint64
-	industries []string
-	role       []string
-}
-
 type EmployerResponse struct {
 	ID         uint64
 	Name       string
@@ -41,10 +35,6 @@ type EmployerResponse struct {
 	Industry   string
 	IndustryId uint64
 	Deleted   bool
-}
-
-type GetEmployersResponse struct {
-	Employers []EmployerResponse `json:"employers"`
 }
 
 func GetEmployers(w http.ResponseWriter, r *http.Request) {

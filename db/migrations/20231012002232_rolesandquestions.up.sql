@@ -17,4 +17,13 @@ ALTER TABLE QuestionSets ADD COLUMN roleId BIGINT;
 ALTER TABLE QuestionSets
 ADD CONSTRAINT fk_questionsets_roles FOREIGN KEY (roleId) REFERENCES Roles(id);
 
+ALTER TABLE Questions DROP COLUMN deleted;
+
+ALTER TABLE QuestionSets ADD COLUMN name TEXT;
+
+ALTER TABLE QuestionSets
+ADD CONSTRAINT questionsets_name_unique UNIQUE (name);
+
+ALTER TABLE QuestionSets DROP COLUMN questions;
+
 COMMIT;
