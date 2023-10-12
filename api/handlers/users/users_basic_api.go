@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"backend/services/user"
+	"backend/api/middleware"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,10 +15,15 @@ func InitUsersRoutes(router chi.Router) {
 		// Middlewares
 		//r.Use(middleware.GoogleAuth)
 
-		// Routes
+		// Admin Routes
 		r.Get("/", GetUser)
-		r.Get("/me", GetUserWithSelf)
-		r.Post("/", CreateUser)
+
+		// User Routes
+		r.Group(func(r chi.Router) {
+			middleware.UserAuth(r)
+			r.Get("/me", GetUserWithSelf)
+			r.Post("/", CreateUser)
+		})
 	})
 }
 
