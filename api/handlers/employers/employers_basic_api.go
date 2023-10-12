@@ -57,7 +57,6 @@ func GetEmployers(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
-
 		response := employersToResponseHelper(employers)
 
 		// Marshal the response to JSON

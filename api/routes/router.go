@@ -4,6 +4,7 @@ import (
 	employerHandler "backend/api/handlers/employers"
 	industriesHandler "backend/api/handlers/industries"
 	practiceHandler "backend/api/handlers/practice"
+	rolesHandler "backend/api/handlers/roles"
 	usersHandler "backend/api/handlers/users"
 	"log"
 	"net/http"
@@ -43,6 +44,7 @@ func InitRouter() {
 	practiceHandler.InitPracticeRoutes(r)
 	employerHandler.InitEmployersRoutes(r)
 	industriesHandler.InitIndustriesRoutes(r)
+	rolesHandler.InitRolesRoute(r)
 	log.Println("Server is running on port 8080")
 	http.ListenAndServe(":8080", r)
 }
