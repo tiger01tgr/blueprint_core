@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"fmt"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -41,7 +42,7 @@ type QuestionSetResponse struct {
 
 type QuestionRequest struct {
     Text     string `json:"text"`
-    Timelimit string `json:"timelimit"`
+    Timelimit int `json:"timelimit"`
 }
 
 type QuestionSetRequest struct {
@@ -75,10 +76,10 @@ func GetQuestion(w http.ResponseWriter, r *http.Request) {
 
 func CreateQuestionSet(w http.ResponseWriter, r *http.Request) {
 	var request QuestionSetRequest
-
     // Parse the JSON data from the request body
     if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err)
         return
     }
 
@@ -87,15 +88,9 @@ func CreateQuestionSet(w http.ResponseWriter, r *http.Request) {
 	var questionList []models.Question
     // Now you can work with the questions slice
     for _, q := range questions {
-		timelimit, err := strconv.Atoi(q.Timelimit)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
 		questionList = append(questionList, models.Question{
 			Text: q.Text,
-			TimeLimit: uint64(timelimit),
+			TimeLimit: uint64(q.Timelimit),
 		})
     }
 
