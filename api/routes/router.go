@@ -48,8 +48,10 @@ func InitRouter() {
 	rolesHandler.InitRolesRoute(r)
 
 	if os.Getenv("ENV") == "deploy" {
-		log.Println("Server is running in prod")
-		http.ListenAndServe("0.0.0.0", r)
+		port := os.Getenv("PORT")
+		host := "0.0.0.0:" + port
+		log.Println("Server is running on " + host)
+		http.ListenAndServe(host, r)
 	} else {
 		log.Println("Server is running on :8080")
 		http.ListenAndServe(":8080", r)
