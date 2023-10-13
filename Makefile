@@ -1,8 +1,8 @@
 run:
-	ENV=prod go run main.go
+	ENV=prod go run cmd/init/main.go
 
 dev:
-	ENV=dev go run main.go
+	ENV=dev go run cmd/init/main.go
 
 test:
 	go test -v ./...
