@@ -16,8 +16,10 @@ func main() {
 	var env string
 	if os.Getenv("ENV") == "prod" {
 		env = ".env"
-	} else {
+	} else if os.Getenv("ENV") == "dev" {
 		env = ".env.dev"
+	} else if os.Getenv("ENV") == "deploy" {
+		
 	}
 
 	err := godotenv.Load(env)
