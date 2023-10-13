@@ -46,5 +46,5 @@ func InitRouter() {
 	industriesHandler.InitIndustriesRoutes(r)
 	rolesHandler.InitRolesRoute(r)
 	log.Println("Server is running on port 8080")
-	http.ListenAndServe("", r)
+	http.ListenAndServe("0.0.0.0", r)
 }
