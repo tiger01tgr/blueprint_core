@@ -51,7 +51,7 @@ func InitRouter() {
 		log.Println("Server is running in prod")
 		http.ListenAndServe("0.0.0.0", r)
 	} else {
-		log.Println("Server is running in prod")
+		log.Println("Server is running on :8080")
 		http.ListenAndServe(":8080", r)
 	}
 }
