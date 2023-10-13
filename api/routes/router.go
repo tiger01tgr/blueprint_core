@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"os"
 	employerHandler "backend/api/handlers/employers"
 	industriesHandler "backend/api/handlers/industries"
 	practiceHandler "backend/api/handlers/practice"
@@ -45,6 +46,12 @@ func InitRouter() {
 	employerHandler.InitEmployersRoutes(r)
 	industriesHandler.InitIndustriesRoutes(r)
 	rolesHandler.InitRolesRoute(r)
-	log.Println("Server is running on port 8080")
-	http.ListenAndServe("0.0.0.0", r)
+
+	if os.Getenv("ENV") == "deploy" {
+		log.Println("Server is running in prod")
+		http.ListenAndServe("0.0.0.0", r)
+	} else {
+		log.Println("Server is running in prod")
+		http.ListenAndServe(":8080", r)
+	}
 }
