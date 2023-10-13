@@ -6,10 +6,10 @@ import (
 
 // Question represents the Questions table in the database.
 type Question struct {
-	ID            uint64
-	QuestionSetId uint64
+	ID            int64
+	QuestionSetId int64
 	Text          string
-	TimeLimit     uint64
+	TimeLimit     int64
 }
 
 func (q Question) String() string {

@@ -23,7 +23,7 @@ func CreateUser(firstName, middleName, lastName, email, userType string) (*sql.R
 	return &res, err
 }
 
-func ReadUserWithId(id int) (*sql.Row, error) {
+func ReadUserWithId(id int64) (*sql.Row, error) {
 	database := db.GetDB()
 	row := database.QueryRow("SELECT * FROM Users WHERE id = $1", id)
 	if row.Err() != nil {
@@ -41,7 +41,7 @@ func ReadUserWithEmail(email string) (*sql.Row, error) {
 	return row, nil
 }
 
-func UpdateUserLastLogin(id int) (*sql.Result, error) {
+func UpdateUserLastLogin(id int64) (*sql.Result, error) {
 	database := db.GetDB()
 	res, err := database.Exec("UPDATE Users SET last_login = $1 WHERE id = $2", time.Now(), id)
 	if err != nil {
@@ -50,7 +50,7 @@ func UpdateUserLastLogin(id int) (*sql.Result, error) {
 	return &res, nil
 }
 
-func DeleteUser(id int) (*sql.Result, error) {
+func DeleteUser(id int64) (*sql.Result, error) {
 	database := db.GetDB()
 	res, err := database.Exec("UPDATE Users SET deleted = $1 WHERE id = $2", true, id)
 	if err != nil {

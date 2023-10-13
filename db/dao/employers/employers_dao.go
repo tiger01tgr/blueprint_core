@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func CreateEmployer(name, logoUrl string, industryId int) (*sql.Result, error) {
+func CreateEmployer(name, logoUrl string, industryId int64) (*sql.Result, error) {
 	db := db.GetDB()
 	res, err := db.Exec(
 		"INSERT INTO Employers (name, logo, industryId, created_at, deleted) VALUES ($1, $2, $3, $4, $5)",

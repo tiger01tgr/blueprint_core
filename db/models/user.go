@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID         uint64      // int8 non-nullable
+	ID         int64     // int8 non-nullable
 	FirstName  string    // varchar non-nullable
 	MiddleName string    // varchar nullable
 	LastName   string    // varchar non-nullable

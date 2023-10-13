@@ -34,7 +34,7 @@ func CreateRole(name string) error {
 }
 
 func EditRole(id, name string) error {
-	dbId, err := strconv.Atoi(id)
+	dbId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func EditRole(id, name string) error {
 }
 
 func DeleteRole(id string) error {
-	dbId, err := strconv.Atoi(id)
+	dbId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}

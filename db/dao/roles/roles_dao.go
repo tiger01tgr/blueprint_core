@@ -23,7 +23,7 @@ func CreateRole(name string) (*sql.Result, error) {
 	return &res, err
 }
 
-func UpdateRole(id int, name string) error {
+func UpdateRole(id int64, name string) error {
 	db := db.GetDB()
 	_, err := db.Exec("UPDATE Roles SET name = $1 WHERE id = $2", name, id)
 	if err != nil {
@@ -32,7 +32,7 @@ func UpdateRole(id int, name string) error {
 	return nil
 }
 
-func DeleteRole(id int) error {
+func DeleteRole(id int64) error {
 	db := db.GetDB()
 	_, err := db.Exec("DELETE FROM Roles WHERE id = $1", id)
 	if err != nil {

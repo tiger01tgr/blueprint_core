@@ -34,7 +34,7 @@ func CreateIndustry(name string) error {
 }
 
 func EditIndustry(id, name string) error {
-	dbId, err := strconv.Atoi(id)
+	dbId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func EditIndustry(id, name string) error {
 }
 
 func DeleteIndustry(id string) error {
-	dbId, err := strconv.Atoi(id)
+	dbId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
