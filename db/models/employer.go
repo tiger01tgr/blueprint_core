@@ -6,13 +6,13 @@ import (
 )
 
 type Employer struct {
-	ID        uint64
-	Name      string
-	Logo      string
-	Industry  string
-	IndustryId uint64
-	CreatedAt time.Time
-	Deleted   bool
+	ID         int64
+	Name       string
+	Logo       string
+	Industry   string
+	IndustryId int64
+	CreatedAt  time.Time
+	Deleted    bool
 }
 
 func (e Employer) String() string {
@@ -26,4 +26,3 @@ func (e Employer) String() string {
 		", deleted: " + fmt.Sprint(e.Deleted) +
 		"}"
 }
-

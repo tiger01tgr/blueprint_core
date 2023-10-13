@@ -11,7 +11,7 @@ func GetUsers() {
 
 }
 
-func GetUserWithId(id int) (*models.User, error) {
+func GetUserWithId(id int64) (*models.User, error) {
 	row, err := dao.ReadUserWithId(id)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func GetUserWithEmail(email string) (*models.User, error) {
 	return &u, nil
 }
 
-func CreateUser(firstname string, middlename string, lastname string, email string, userType string, ) error {
+func CreateUser(firstname string, middlename string, lastname string, email string, userType string) error {
 	_, err := dao.CreateUser(firstname, middlename, lastname, email, userType)
 	if err != nil {
 		return err

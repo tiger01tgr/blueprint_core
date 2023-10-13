@@ -29,11 +29,11 @@ func InitEmployersRoutes(router chi.Router) {
 }
 
 type EmployerResponse struct {
-	ID         uint64
+	ID         int64
 	Name       string
 	Logo       string
 	Industry   string
-	IndustryId uint64
+	IndustryId int64
 	Deleted   bool
 }
 

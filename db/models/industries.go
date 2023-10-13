@@ -5,8 +5,8 @@ import (
 )
 
 type Industry struct {
-	ID        uint64
-	Name      string
+	ID   int64
+	Name string
 }
 
 func (i Industry) String() string {
@@ -15,4 +15,3 @@ func (i Industry) String() string {
 		", name: " + i.Name +
 		"}"
 }
-

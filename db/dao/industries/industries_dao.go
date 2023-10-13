@@ -23,7 +23,7 @@ func CreateIndustry(name string) (*sql.Result, error) {
 	return &res, err
 }
 
-func UpdateIndustry(id int, name string) error {
+func UpdateIndustry(id int64, name string) error {
 	db := db.GetDB()
 	_, err := db.Exec("UPDATE Industries SET name = $1 WHERE id = $2", name, id)
 	if err != nil {
@@ -32,7 +32,7 @@ func UpdateIndustry(id int, name string) error {
 	return nil
 }
 
-func DeleteIndustry(id int) error {
+func DeleteIndustry(id int64) error {
 	db := db.GetDB()
 	_, err := db.Exec("DELETE FROM Industries WHERE id = $1", id)
 	if err != nil {

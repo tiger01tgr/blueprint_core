@@ -57,7 +57,7 @@ func CreateEmployer(name, industryId string, logo multipart.File) error {
 		return fmt.Errorf("Invalid request payload")
 	}
 
-	industryIdInt, err := strconv.Atoi(industryId)
+	industryIdInt, err := strconv.ParseInt(industryId, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,6 @@ func UpdateEmployer(id, name, industryId string, logo multipart.File) error {
 		return err
 	}
 
-
 	// set name
 	if name == "" {
 		name = e.Name
@@ -105,21 +104,6 @@ func UpdateEmployer(id, name, industryId string, logo multipart.File) error {
 	}
 	if logoUrl == "" {
 		logoUrl = e.Logo
-	}
-
-	// set industryId
-	var industryIdInt uint64
-	if industryId != "" {
-		industryIdInt, err = strconv.ParseUint(industryId, 10, 64)
-		if err != nil {
-			return err
-		}
-	}
-
-	if industryId != "" {
-		industryId = strconv.Itoa(int(industryIdInt))
-	} else {
-		industryId = strconv.Itoa(int(e.IndustryId))
 	}
 
 	err = dao.UpdateEmployer(id, name, logoUrl, industryId)

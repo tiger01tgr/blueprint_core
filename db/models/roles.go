@@ -5,8 +5,8 @@ import (
 )
 
 type Roles struct {
-	ID        uint64
-	Name      string
+	ID   int64
+	Name string
 }
 
 func (i Roles) String() string {
@@ -15,4 +15,3 @@ func (i Roles) String() string {
 		", name: " + i.Name +
 		"}"
 }
-

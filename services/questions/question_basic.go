@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-func CreateQuestionSetAndQuestions(name string, roleId uint64, employerId uint64, interviewType string, questions []models.Question) error {
+func CreateQuestionSetAndQuestions(name string, roleId int64, employerId int64, interviewType string, questions []models.Question) error {
 	id, err := CreateQuestionSet(name, employerId, roleId, interviewType)
 	if err != nil {
 		return err
@@ -23,24 +23,24 @@ func CreateQuestionSetAndQuestions(name string, roleId uint64, employerId uint64
 	return nil
 }
 
-func CreateQuestionSet(name string, employerId uint64, roleId uint64, interviewType string) (uint64, error) {
+func CreateQuestionSet(name string, employerId int64, roleId int64, interviewType string) (int64, error) {
 	_, err := questionSet_dao.CreateQuestionSet(name, interviewType, employerId, roleId)
 	if err != nil {
 		return 0, err
 	}
-	row, err := questionSet_dao.GetQuestionSetsByName(name)
+	row, err := questionSet_dao.CustomQueryForRow("SELECT id FROM QuestionSets WHERE name = $1 AND interviewType = $4", name, interviewType)
 	var qs models.QuestionSet
 	row.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted)
-	return uint64(qs.ID), nil
+	return int64(qs.ID), nil
 }
 
-func CreateQuestion(questionSetId uint64, question string, timelimit uint64) error {
-	_, err := question_dao.CreateQuestion(int(questionSetId), question, int(timelimit))
+func CreateQuestion(questionSetId int64, question string, timelimit int64) error {
+	_, err := question_dao.CreateQuestion(int64(questionSetId), question, int64(timelimit))
 	return err
 }
 
-func GetAllQuestionSets() ([]models.QuestionSet, error) {
-	rows, err := questionSet_dao.GetAllQuestionSets()
+func GetAllQuestionSets(limit int64) ([]models.QuestionSet, error) {
+	rows, err := questionSet_dao.GetAllQuestionSets(limit)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func GetAllQuestionSets() ([]models.QuestionSet, error) {
 	var questionSets []models.QuestionSet
 	for rows.Next() {
 		var qs models.QuestionSet
-		if err := rows.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted); err != nil {
+		if err := rows.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted, &qs.Logo, &qs.EmployerName, &qs.RoleName, &qs.IndustryId, &qs.IndustryName); err != nil {
 			return nil, err
 		}
 		questionSets = append(questionSets, qs)
@@ -59,8 +59,8 @@ func GetAllQuestionSets() ([]models.QuestionSet, error) {
 	return questionSets, nil
 }
 
-func GetQuestionSetWithId(id uint64) (*models.QuestionSet, error) {
-	row, err := questionSet_dao.GetQuestionSetsByID(int(id))
+func GetQuestionSetWithId(id int64) (*models.QuestionSet, error) {
+	row, err := questionSet_dao.GetQuestionSetsByID(int64(id))
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +71,8 @@ func GetQuestionSetWithId(id uint64) (*models.QuestionSet, error) {
 	return qs, nil
 }
 
-func GetQuestionWithId(id uint64) (*models.Question, error) {
-	row, err := question_dao.GetQuestionByID(int(id))
+func GetQuestionWithId(id int64) (*models.Question, error) {
+	row, err := question_dao.GetQuestionByID(int64(id))
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +83,8 @@ func GetQuestionWithId(id uint64) (*models.Question, error) {
 	return q, nil
 }
 
-func GetQuestionsWithQuestionSetId(id uint64) ([]models.Question, error) {
-	rows, err := question_dao.GetQuestionsByQuestionSetID(int(id))
+func GetQuestionsWithQuestionSetId(id int64) (*[]models.Question, error) {
+	rows, err := question_dao.GetQuestionsByQuestionSetID(id)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -100,20 +100,21 @@ func GetQuestionsWithQuestionSetId(id uint64) ([]models.Question, error) {
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	return questions, nil
+	fmt.Println("questions: ", questions)
+	return &questions, nil
 }
 
-func EditQuestionSet(id uint64, name, interviewType string, employerId, roleId uint64) error {
-	err := questionSet_dao.UpdateQuestionSet(int(id), name, interviewType, employerId, roleId)
+func EditQuestionSet(id int64, name, interviewType string, employerId, roleId int64) error {
+	err := questionSet_dao.UpdateQuestionSet(int64(id), name, interviewType, employerId, roleId)
 	return err
 }
 
-func EditQuestion(id uint64, text string, timelimit uint64) error {
-	err := question_dao.UpdateQuestion(int(id), text, int(timelimit))
+func EditQuestion(id int64, text string, timelimit int64) error {
+	err := question_dao.UpdateQuestion(int64(id), text, int64(timelimit))
 	return err
 }
 
-// func DeleteQuestionSetRecursively(id uint64) error {
+// func DeleteQuestionSetRecursively(id int64) error {
 // 	qs, err := GetQuestionSetWithId(id)
 // 	if err != nil {
 // 		return err
@@ -124,20 +125,20 @@ func EditQuestion(id uint64, text string, timelimit uint64) error {
 // 			return err
 // 		}
 // 	}
-// 	err = questionSet_dao.DeleteQuestionSetRow(int(id))
+// 	err = questionSet_dao.DeleteQuestionSetRow(int64(id))
 // 	if err != nil {
 // 		return err
 // 	}
 // 	return nil
 // }
 
-func DeleteQuestionSet(id uint64) error {
-	err := questionSet_dao.DeleteQuestionSet(int(id))
+func DeleteQuestionSet(id int64) error {
+	err := questionSet_dao.DeleteQuestionSet(int64(id))
 	return err
 }
 
-func DeleteQuestion(id uint64) error {
-	err := question_dao.DeleteQuestion(int(id))
+func DeleteQuestion(id int64) error {
+	err := question_dao.DeleteQuestion(int64(id))
 	return err
 }
 

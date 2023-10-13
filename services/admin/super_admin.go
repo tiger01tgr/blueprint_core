@@ -1,13 +1,13 @@
 package admin
 
 import (
-	"backend/db/dao/admin"
+	dao "backend/db/dao/admin"
 	"backend/services/jwt"
 	"errors"
 )
 
 type SuperAdmin struct {
-	ID       int
+	ID       int64
 	Email    string
 	Password string
 }
