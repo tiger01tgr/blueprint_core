@@ -1,4 +1,4 @@
-package employers
+package questions
 
 import (
 	questionSet_dao "backend/db/dao/question_sets"
@@ -39,8 +39,9 @@ func CreateQuestion(questionSetId int64, question string, timelimit int64) error
 	return err
 }
 
-func GetAllQuestionSets(limit int64) ([]models.QuestionSet, error) {
-	rows, err := questionSet_dao.GetAllQuestionSets(limit)
+func GetAllQuestionSets(page, limit int64) ([]models.QuestionSet, error) {
+	offset := (page - 1) * limit
+	rows, err := questionSet_dao.GetAllQuestionSets(offset, limit)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -57,6 +58,16 @@ func GetAllQuestionSets(limit int64) ([]models.QuestionSet, error) {
 		return nil, err
 	}
 	return questionSets, nil
+}
+
+func GetPaginationForAllQuestionSets(limit int64) (int64, error) {
+	row, err := questionSet_dao.GetNumberOfQuestionSets()
+	if err != nil {
+		return 0, err
+	}
+	var count int64
+	row.Scan(&count)
+	return (count / limit) + 1, nil
 }
 
 func GetQuestionSetWithId(id int64) (*models.QuestionSet, error) {
@@ -102,6 +113,54 @@ func GetQuestionsWithQuestionSetId(id int64) (*[]models.Question, error) {
 	}
 	fmt.Println("questions: ", questions)
 	return &questions, nil
+}
+
+func GetFilteredQuestionSets(employers, industries, roles []int64, interviewTypes []string, page int64, limit int64) ([]models.QuestionSet, error) {
+	offset := (page - 1) * limit
+	questionSetFilter := CreateQuestionSetFilter()
+	questionSetFilter.CreateGetBasicQuery()
+	questionSetFilter.AddEmployersFilter(employers)
+	questionSetFilter.AddIndustriesFilter(industries)
+	questionSetFilter.AddRolesFilter(roles)
+	questionSetFilter.AddInterviewTypesFilter(interviewTypes)
+	questionSetFilter.AddLimitAndOffset(limit, offset)
+	rows, err := questionSet_dao.CustomQueryForRows(questionSetFilter.Query)
+	defer rows.Close()
+	if err != nil {
+		fmt.Println("err: ", err)
+		return nil, err
+	}
+	var questionSets []models.QuestionSet
+	for rows.Next() {
+		var qs models.QuestionSet
+		if err := rows.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted, &qs.Logo, &qs.EmployerName, &qs.RoleName, &qs.IndustryId, &qs.IndustryName); err != nil {
+			return nil, err
+		}
+		questionSets = append(questionSets, qs)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return questionSets, nil
+
+}
+
+func GetPaginationForFilteredQuestionSets(employers, industries, roles []int64, interviewTypes []string, limit int64) (int64, error) {
+	questionSetFilter := CreateQuestionSetFilter()
+	questionSetFilter.CreateCountBasicQuery()
+	questionSetFilter.AddEmployersFilter(employers)
+	questionSetFilter.AddIndustriesFilter(industries)
+	questionSetFilter.AddRolesFilter(roles)
+	questionSetFilter.AddInterviewTypesFilter(interviewTypes)
+	fmt.Println("questionSetFilter.Query: ", questionSetFilter.Query)
+	row, err := questionSet_dao.CustomQueryForRow(questionSetFilter.Query)
+	if err != nil {
+		fmt.Println("err: ", err)
+		return 0, err
+	}
+	var count int64
+	row.Scan(&count)
+	return (count / limit) + 1, nil
 }
 
 func EditQuestionSet(id int64, name, interviewType string, employerId, roleId int64) error {
