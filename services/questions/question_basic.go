@@ -49,7 +49,7 @@ func GetAllQuestionSets(page, limit int64) ([]models.QuestionSet, error) {
 	var questionSets []models.QuestionSet
 	for rows.Next() {
 		var qs models.QuestionSet
-		if err := rows.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted, &qs.Logo, &qs.EmployerName, &qs.RoleName, &qs.IndustryId, &qs.IndustryName); err != nil {
+		if err := rows.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted, &qs.Logo, &qs.RoleName, &qs.EmployerName, &qs.IndustryId, &qs.IndustryName); err != nil {
 			return nil, err
 		}
 		questionSets = append(questionSets, qs)
@@ -133,7 +133,7 @@ func GetFilteredQuestionSets(employers, industries, roles []int64, interviewType
 	var questionSets []models.QuestionSet
 	for rows.Next() {
 		var qs models.QuestionSet
-		if err := rows.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted, &qs.Logo, &qs.EmployerName, &qs.RoleName, &qs.IndustryId, &qs.IndustryName); err != nil {
+		if err := rows.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted, &qs.Logo, &qs.RoleName, &qs.EmployerName, &qs.IndustryId, &qs.IndustryName); err != nil {
 			return nil, err
 		}
 		questionSets = append(questionSets, qs)
