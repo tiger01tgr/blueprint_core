@@ -5,11 +5,11 @@ import (
 	questionService "backend/services/questions"
 	"encoding/json"
 	"fmt"
-	// "math/rand"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
-	// "time"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -121,83 +121,78 @@ func GetQuestionSets(w http.ResponseWriter, r *http.Request) {
 	} else {
 		page = 1
 	}
-	fmt.Println("page: ", page)
-	fmt.Println("limit: ", limit)
+	// fmt.Println("page: ", page)
+	// fmt.Println("limit: ", limit)
 
 	switch r.FormValue("query") {
-	// case "filter":
-	// 	{
-	// 		// var filter FilterRequest
+	case "filter":
+		{
+			// var filter FilterRequest
 
-	// 		// // Decode the JSON data from the request body
-	// 		// decoder := json.NewDecoder(r.Body)
-	// 		// if err := decoder.Decode(&filter); err != nil {
-	// 		// 	http.Error(w, "Failed to decode JSON", http.StatusBadRequest)
-	// 		// 	return
-	// 		// }
+			// // Decode the JSON data from the request body
+			// decoder := json.NewDecoder(r.Body)
+			// if err := decoder.Decode(&filter); err != nil {
+			// 	http.Error(w, "Failed to decode JSON", http.StatusBadRequest)
+			// 	return
+			// }
 
-	// 		// // Access the arrays in requestData
-	// 		// employers := filter.EmployerIds
-	// 		// industries := filter.IndustryIds
-	// 		// roles := filter.RoleIds
-	// 		// interviewTypes := filter.InterviewTypes
-	// 		employersStr := r.FormValue("employers")
-	// 		industriesStr := r.FormValue("industries")
-	// 		rolesStr := r.FormValue("roles")
-	// 		interviewTypes := r.Form["interviewTypes"]
-	// 		fmt.Println("employersStr: ", employersStr)
-	// 		fmt.Println("industriesStr: ", industriesStr)
-	// 		fmt.Println("rolesStr: ", rolesStr)
-	// 		employers := convertStringToInt64Array(employersStr)
-	// 		industries := convertStringToInt64Array(industriesStr)
-	// 		roles := convertStringToInt64Array(rolesStr)
+			// // Access the arrays in requestData
+			// employers := filter.EmployerIds
+			// industries := filter.IndustryIds
+			// roles := filter.RoleIds
+			// interviewTypes := filter.InterviewTypes
+			employersStr := r.FormValue("employers")
+			industriesStr := r.FormValue("industries")
+			rolesStr := r.FormValue("roles")
+			interviewTypes := r.Form["interviewTypes"]
+			fmt.Println("employersStr: ", employersStr)
+			fmt.Println("industriesStr: ", industriesStr)
+			fmt.Println("rolesStr: ", rolesStr)
+			employers := convertStringToInt64Array(employersStr)
+			industries := convertStringToInt64Array(industriesStr)
+			roles := convertStringToInt64Array(rolesStr)
 
-	// 		fmt.Println("employers: ", employers)
-	// 		fmt.Println("industries: ", industries)
-	// 		fmt.Println("roles: ", roles)
-	// 		fmt.Println("interviewTypes: ", interviewTypes)
-
-	// 		// Getting data for response
-	// 		questionSets, err := questionService.GetFilteredQuestionSets(employers, industries, roles, interviewTypes, page, limit)
-	// 		if err != nil {
-	// 			w.WriteHeader(http.StatusInternalServerError)
-	// 			w.Write([]byte(err.Error()))
-	// 			return
-	// 		}
-	// 		rand.Seed(time.Now().UnixNano())
-	// 		rand.Shuffle(len(questionSets), func(i, j int) {
-	// 			questionSets[i], questionSets[j] = questionSets[j], questionSets[i]
-	// 		})
-	// 		var responses []QuestionSet
-	// 		for _, questionSet := range questionSets {
-	// 			responses = append(responses, makeQuestionSetResponseHelper(questionSet))
-	// 		}
-	// 		// Getting pagination for response
-	// 		totalPages, err := questionService.GetPaginationForFilteredQuestionSets(employers, industries, roles, interviewTypes, limit)
-	// 		if err != nil {
-	// 			w.WriteHeader(http.StatusInternalServerError)
-	// 			w.Write([]byte(err.Error()))
-	// 			return
-	// 		}
-	// 		pagination := Pagination{
-	// 			TotalPages:  totalPages,
-	// 			CurrentPage: page,
-	// 			Limit:       limit,
-	// 		}
-	// 		fmt.Println("pagination: ", pagination)
-	// 		response := QuestionSetResponse{responses, pagination}
-	// 		fmt.Println("response: ", response)
-	// 		jsonData, err := json.Marshal(response)
-	// 		if err != nil {
-	// 			w.WriteHeader(http.StatusInternalServerError)
-	// 			w.Write([]byte(err.Error()))
-	// 			return
-	// 		}
-	// 		w.Header().Set("Content-Type", "application/json")
-	// 		w.WriteHeader(http.StatusOK)
-	// 		w.Write(jsonData)
-	// 		return
-	// 	}
+			// Getting data for response
+			questionSets, err := questionService.GetFilteredQuestionSets(employers, industries, roles, interviewTypes, page, limit)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+				return
+			}
+			rand.Seed(time.Now().UnixNano())
+			rand.Shuffle(len(questionSets), func(i, j int) {
+				questionSets[i], questionSets[j] = questionSets[j], questionSets[i]
+			})
+			var responses []QuestionSet
+			for _, questionSet := range questionSets {
+				responses = append(responses, makeQuestionSetResponseHelper(questionSet))
+			}
+			// Getting pagination for response
+			totalPages, err := questionService.GetPaginationForFilteredQuestionSets(employers, industries, roles, interviewTypes, limit)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+				return
+			}
+			pagination := Pagination{
+				TotalPages:  totalPages,
+				CurrentPage: page,
+				Limit:       limit,
+			}
+			fmt.Println("pagination: ", pagination)
+			response := QuestionSetResponse{responses, pagination}
+			fmt.Println("response: ", response)
+			jsonData, err := json.Marshal(response)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write(jsonData)
+			return
+		}
 
 	default:
 		{
