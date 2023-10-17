@@ -145,9 +145,6 @@ func GetQuestionSets(w http.ResponseWriter, r *http.Request) {
 			industriesStr := r.FormValue("industries")
 			rolesStr := r.FormValue("roles")
 			interviewTypes := r.Form["interviewTypes"]
-			fmt.Println("employersStr: ", employersStr)
-			fmt.Println("industriesStr: ", industriesStr)
-			fmt.Println("rolesStr: ", rolesStr)
 			employers := convertStringToInt64Array(employersStr)
 			industries := convertStringToInt64Array(industriesStr)
 			roles := convertStringToInt64Array(rolesStr)
@@ -179,9 +176,7 @@ func GetQuestionSets(w http.ResponseWriter, r *http.Request) {
 				CurrentPage: page,
 				Limit:       limit,
 			}
-			fmt.Println("pagination: ", pagination)
 			response := QuestionSetResponse{responses, pagination}
-			fmt.Println("response: ", response)
 			jsonData, err := json.Marshal(response)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
