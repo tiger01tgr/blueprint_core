@@ -11,6 +11,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
+func UploadResume(fileName string, file *multipart.File) (string, error) {
+	return uploadFile("resumes/resume-"+fileName+".pdf", "application/pdf", *file)
+}
+
 func UploadCompanyLogo(fileName string, file *multipart.File) (string, error) {
 	return uploadFile("company-logos/logo-"+fileName+".png", "image/png", *file)
 }

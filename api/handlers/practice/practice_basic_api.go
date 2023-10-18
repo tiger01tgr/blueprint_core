@@ -127,20 +127,6 @@ func GetQuestionSets(w http.ResponseWriter, r *http.Request) {
 	switch r.FormValue("query") {
 	case "filter":
 		{
-			// var filter FilterRequest
-
-			// // Decode the JSON data from the request body
-			// decoder := json.NewDecoder(r.Body)
-			// if err := decoder.Decode(&filter); err != nil {
-			// 	http.Error(w, "Failed to decode JSON", http.StatusBadRequest)
-			// 	return
-			// }
-
-			// // Access the arrays in requestData
-			// employers := filter.EmployerIds
-			// industries := filter.IndustryIds
-			// roles := filter.RoleIds
-			// interviewTypes := filter.InterviewTypes
 			employersStr := r.FormValue("employers")
 			industriesStr := r.FormValue("industries")
 			rolesStr := r.FormValue("roles")

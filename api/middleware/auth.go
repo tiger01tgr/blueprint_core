@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 	"backend/services/jwt"
+	"backend/services/user"
 )
 
 func SuperAdminAuth(router chi.Router) {
@@ -46,8 +47,14 @@ func GoogleAuth(next http.Handler) http.Handler {
 			w.Write([]byte("Invalid authorization header provided"))
 			return
 		}
-
-		ctx := context.WithValue(r.Context(), "email", idToken.Claims["email"])
+		email := idToken.Claims["email"]
+		id, err := user.GetUserIdWithEmail(email.(string))
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Invalid authorization header provided"))
+			return
+		}
+		ctx := context.WithValue(r.Context(), "id", id)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
