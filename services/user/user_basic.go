@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"mime/multipart"
+	"errors"
 
 	"github.com/google/uuid"
 )
@@ -31,11 +32,18 @@ func GetUserWithId(id int64) (*models.User, error) {
 func GetUserIdWithEmail(email string) (int64, error) {
 	row, err := dao.ReadUserIdWithEmail(email)
 	if err != nil {
+		fmt.Println(err)
 		return 0, err
 	}
 	var id int64
 	err = row.Scan(&id)
-	fmt.Println("Serivces: ", id)
+	if err != nil && err == sql.ErrNoRows {
+		// If there are no rows, call the function to create a user here.
+		// createUser(email) // You can call your user creation function here.
+		fmt.Println("No user found for email:", email)
+		// Return an error or handle it accordingly
+		return 0, errors.New("No user found for email")
+	}
 	return id, err
 }
 

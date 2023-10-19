@@ -5,6 +5,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"fmt"
 
 	"firebase.google.com/go/auth"
 	"github.com/go-chi/chi/v5"
@@ -37,12 +38,12 @@ func GoogleAuth(next http.Handler) http.Handler {
 		token := strings.Split(authHeader, " ")[1]
 
 		fb := firebase.GetFirebase()
-
 		var idToken *auth.Token
 		var err error
 		idToken, err = fb.VerifyIDToken(context.Background(), token)
 
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("Invalid authorization header provided"))
 			return
@@ -50,9 +51,22 @@ func GoogleAuth(next http.Handler) http.Handler {
 		email := idToken.Claims["email"]
 		id, err := user.GetUserIdWithEmail(email.(string))
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Invalid authorization header provided"))
-			return
+			if err.Error() == "No user found for email" {
+				// Create user
+				user.CreateUser("", "", "", email.(string), "user")
+				id, err = user.GetUserIdWithEmail(email.(string))
+				if err != nil {
+					fmt.Println(err)
+					w.WriteHeader(http.StatusUnauthorized)
+					w.Write([]byte("Invalid authorization header provided"))
+					return
+				}
+			} else {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte("Invalid authorization header provided"))
+				return
+			}
 		}
 		ctx := context.WithValue(r.Context(), "id", id)
 		next.ServeHTTP(w, r.WithContext(ctx))

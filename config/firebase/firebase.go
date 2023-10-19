@@ -35,19 +35,6 @@ func InitFirebase() {
 	if err != nil {
 		panic(fmt.Errorf("error initializing app: %v", err))
 	}
-	// relativePath, err := filepath.Rel(".", "firebase.json")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// opt := option.WithCredentialsFile(relativePath)
-	// fb, err := firebase.NewApp(context.Background(), nil, opt)
-	// if err != nil {
-	// 	panic(fmt.Errorf("error initializing app: %v", err))
-	// }
-	// app, err = fb.Auth(context.Background())
-	// if err != nil {
-	// 	panic(fmt.Errorf("error initializing app: %v", err))
-	// }
 }
 
 func createFirebaseOptions() *option.ClientOption {
