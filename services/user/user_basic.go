@@ -56,8 +56,14 @@ func CreateUser(firstname string, middlename string, lastname string, email stri
 }
 
 func UpdateUserProfile(id int64, firstname, middlename, lastname, school, major, employer, position, phone string, resume *multipart.File) error {
-	uuid := uuid.New()
-	resumeUrl, err := s3.UploadResume(uuid.String(), resume)
+	var resumeUrl string
+	var err error
+	if resume != nil {
+		uuid := uuid.New()
+		resumeUrl, err = s3.UploadResume(uuid.String(), resume)
+	} else {
+		resumeUrl = ""
+	}
 	if err != nil {
 		return err
 	}

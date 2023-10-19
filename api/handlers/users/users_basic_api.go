@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"mime/multipart"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -168,6 +169,28 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func PatchUserProfile(w http.ResponseWriter,  r *http.Request) {
+	var resume *multipart.File
+	if r.FormValue("isResumeUpdate") == "true" {
+		err := r.ParseMultipartForm(10 << 20) // 10 MB maximum file size
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Unable to parse form or form is too large"))
+			return
+		}
+		resumeFile, _, err := r.FormFile("resume")
+		defer resumeFile.Close()
+		if err != nil && err != http.ErrMissingFile {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		if err == http.ErrMissingFile {
+			resume = nil
+		} else {
+			resume = &resumeFile
+		}
+	}
+
 	id := r.Context().Value("id").(int64)
 	firstname := r.FormValue("firstname")
 	middlename := r.FormValue("middlename")
@@ -177,14 +200,7 @@ func PatchUserProfile(w http.ResponseWriter,  r *http.Request) {
 	employer := r.FormValue("employer")
 	position := r.FormValue("position")
 	phone := r.FormValue("phone")
-	resume, _, err := r.FormFile("resume")
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	err = user.UpdateUserProfile(id, firstname, middlename, lastname, school, major, employer, position, phone, &resume)
+	err := user.UpdateUserProfile(id, firstname, middlename, lastname, school, major, employer, position, phone, resume)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
