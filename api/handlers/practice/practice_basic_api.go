@@ -5,11 +5,13 @@ import (
 	questionService "backend/services/questions"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
-	"strings"
+	"backend/utils"
 	"time"
+	"backend/api/types"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -33,7 +35,7 @@ func InitPracticeRoutes(router chi.Router) {
 
 type QuestionSetResponse struct {
 	Data       []QuestionSet `json:"data"`
-	Pagination Pagination    `json:"pagination"`
+	Pagination types.Pagination    `json:"pagination"`
 }
 
 type Question struct {
@@ -55,12 +57,6 @@ type QuestionSet struct {
 	InterviewType string `json:"interviewType"`
 }
 
-type Pagination struct {
-	TotalPages  int64 `json:"totalPages"`
-	CurrentPage int64 `json:"currentPage"`
-	Limit       int64 `json:"limit"`
-}
-
 type QuestionSetWithQuestions struct {
 	Id            int64      `json:"id"`
 	Name          string     `json:"name"`
@@ -74,7 +70,7 @@ type QuestionSetWithQuestions struct {
 
 type QuestionRequest struct {
 	Text      string `json:"text"`
-	Timelimit int64  `json:"timelimit"`
+	Timelimit string `json:"timelimit"`
 }
 
 type PostQuestionSetRequest struct {
@@ -131,9 +127,9 @@ func GetQuestionSets(w http.ResponseWriter, r *http.Request) {
 			industriesStr := r.FormValue("industries")
 			rolesStr := r.FormValue("roles")
 			interviewTypes := r.Form["interviewTypes"]
-			employers := convertStringToInt64Array(employersStr)
-			industries := convertStringToInt64Array(industriesStr)
-			roles := convertStringToInt64Array(rolesStr)
+			employers := utils.ConvertStringToInt64Array(employersStr)
+			industries := utils.ConvertStringToInt64Array(industriesStr)
+			roles := utils.ConvertStringToInt64Array(rolesStr)
 
 			// Getting data for response
 			questionSets, err := questionService.GetFilteredQuestionSets(employers, industries, roles, interviewTypes, page, limit)
@@ -157,7 +153,7 @@ func GetQuestionSets(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte(err.Error()))
 				return
 			}
-			pagination := Pagination{
+			pagination := types.Pagination{
 				TotalPages:  totalPages,
 				CurrentPage: page,
 				Limit:       limit,
@@ -200,7 +196,7 @@ func GetQuestionSets(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte(err.Error()))
 				return
 			}
-			pagination := Pagination{
+			pagination := types.Pagination{
 				TotalPages:  totalPages,
 				CurrentPage: page,
 				Limit:       limit,
@@ -314,11 +310,19 @@ func CreateQuestionSet(w http.ResponseWriter, r *http.Request) {
 	var questionList []models.Question
 	// Now you can work with the questions slice
 	for _, q := range questions {
+		timelimit, err := strconv.ParseInt(q.Timelimit, 10, 64)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
 		questionList = append(questionList, models.Question{
 			Text:      q.Text,
-			TimeLimit: int64(q.Timelimit),
+			TimeLimit: timelimit,
 		})
 	}
+	fmt.Println("1")
 
 	name := r.FormValue("name")
 	employerId := r.FormValue("employerId")
@@ -328,6 +332,7 @@ func CreateQuestionSet(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+	fmt.Println("2")
 	roleId := r.FormValue("roleId")
 	roleIdInt, err := strconv.ParseInt(roleId, 10, 64)
 	if err != nil {
@@ -336,8 +341,10 @@ func CreateQuestionSet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	interviewType := r.FormValue("type")
+	fmt.Println("3")
 
 	err = questionService.CreateQuestionSetAndQuestions(name, int64(roleIdInt), int64(employerIdInt), interviewType, questionList)
+	fmt.Println("4")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -375,21 +382,3 @@ func SubmitQuestion(w http.ResponseWriter, r *http.Request) {
 // 		NumQuestions: questionSet.NumQuestions,
 // 	}
 // }
-
-func convertStringToInt64Array(stringSlice string) []int64 {
-	substrings := strings.Split(stringSlice, ",")
-
-	// Initialize a slice to store the converted integers
-	var int64Slice []int64
-
-	for _, subStr := range substrings {
-		intValue, err := strconv.ParseInt(subStr, 10, 64)
-		if err == nil {
-			int64Slice = append(int64Slice, intValue)
-		} else {
-			// Handle the error if the substring cannot be converted to an int64
-			fmt.Printf("Error converting string to int64: %v\n", err)
-		}
-	}
-	return int64Slice
-}

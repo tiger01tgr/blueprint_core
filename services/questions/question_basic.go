@@ -1,6 +1,7 @@
 package questions
 
 import (
+	custom_dao "backend/db/dao/custom"
 	questionSet_dao "backend/db/dao/question_sets"
 	question_dao "backend/db/dao/questions"
 	models "backend/db/models"
@@ -28,10 +29,14 @@ func CreateQuestionSet(name string, employerId int64, roleId int64, interviewTyp
 	if err != nil {
 		return 0, err
 	}
-	row, err := questionSet_dao.CustomQueryForRow("SELECT id FROM QuestionSets WHERE name = $1 AND interviewType = $4", name, interviewType)
-	var qs models.QuestionSet
-	row.Scan(&qs.ID, &qs.Name, &qs.InterviewType, &qs.EmployerId, &qs.RoleId, &qs.CreatedAt, &qs.Deleted)
-	return int64(qs.ID), nil
+	row, err := custom_dao.CustomQueryForRow("SELECT id FROM QuestionSets WHERE name = $1 AND interviewType = $2", name, interviewType)
+	if err != nil {
+		fmt.Println("err: ", err)
+		return 0, err
+	}
+	var id int64
+	row.Scan(&id)
+	return id, err
 }
 
 func CreateQuestion(questionSetId int64, question string, timelimit int64) error {
@@ -124,7 +129,7 @@ func GetFilteredQuestionSets(employers, industries, roles []int64, interviewType
 	questionSetFilter.AddRolesFilter(roles)
 	questionSetFilter.AddInterviewTypesFilter(interviewTypes)
 	questionSetFilter.AddLimitAndOffset(limit, offset)
-	rows, err := questionSet_dao.CustomQueryForRows(questionSetFilter.Query)
+	rows, err := custom_dao.CustomQueryForRows(questionSetFilter.Query)
 	defer rows.Close()
 	if err != nil {
 		fmt.Println("err: ", err)
@@ -153,7 +158,7 @@ func GetPaginationForFilteredQuestionSets(employers, industries, roles []int64, 
 	questionSetFilter.AddRolesFilter(roles)
 	questionSetFilter.AddInterviewTypesFilter(interviewTypes)
 	fmt.Println("questionSetFilter.Query: ", questionSetFilter.Query)
-	row, err := questionSet_dao.CustomQueryForRow(questionSetFilter.Query)
+	row, err := custom_dao.CustomQueryForRow(questionSetFilter.Query)
 	if err != nil {
 		fmt.Println("err: ", err)
 		return 0, err
