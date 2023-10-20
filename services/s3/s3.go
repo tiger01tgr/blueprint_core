@@ -11,6 +11,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
+func UploadUserSubmissionVideo(fileName string, file *multipart.File) (string, error) {
+	return uploadFile("user-submissions/video-"+fileName+".webm", "video/webm", *file)
+}
+
 func UploadResume(fileName string, file *multipart.File) (string, error) {
 	return uploadFile("resumes/resume-"+fileName+".pdf", "application/pdf", *file)
 }

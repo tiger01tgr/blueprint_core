@@ -8,6 +8,7 @@ import (
 	rolesHandler "backend/api/handlers/roles"
 	usersHandler "backend/api/handlers/users"
 	jobsHandler "backend/api/handlers/jobs"
+	practiceSessionHandler "backend/api/handlers/practice_sessions"
 	"log"
 	"net/http"
 	"sync"
@@ -48,6 +49,7 @@ func InitRouter() {
 	industriesHandler.InitIndustriesRoutes(r)
 	rolesHandler.InitRolesRoute(r)
 	jobsHandler.InitJobsRoutes(r)
+	practiceSessionHandler.InitSessionsRoutes(r)
 
 	if os.Getenv("ENV") == "deploy" {
 		port := os.Getenv("PORT")

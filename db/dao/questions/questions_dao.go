@@ -56,3 +56,13 @@ func DeleteQuestion(id int64) error {
 	}
 	return nil
 }
+
+func GetNextQuestion(questionSetId int64, questionid int64) *sql.Row {
+	db := db.GetDB()
+	row := db.QueryRow(
+		"SELECT id,  questionSetId, text, timelimit FROM Questions WHERE questionSetId = $1 AND id > $2 ORDER BY id ASC LIMIT 1",
+		questionSetId,
+		questionid,
+	)
+	return row
+}

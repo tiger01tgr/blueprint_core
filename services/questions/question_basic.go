@@ -173,6 +173,18 @@ func EditQuestionSet(id int64, name, interviewType string, employerId, roleId in
 	return err
 }
 
+func GetNextQuestion(questionSetId int64, questionId int64) (*models.Question, error) {
+	row := question_dao.GetNextQuestion(questionSetId, questionId)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+	q, err := makeQuestionHelper(row)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
 func EditQuestion(id int64, text string, timelimit int64) error {
 	err := question_dao.UpdateQuestion(int64(id), text, int64(timelimit))
 	return err
@@ -199,6 +211,21 @@ func EditQuestion(id int64, text string, timelimit int64) error {
 func DeleteQuestionSet(id int64) error {
 	err := questionSet_dao.DeleteQuestionSet(int64(id))
 	return err
+}
+
+func IfQuestionIdExistsInQuestionSet(questionId int64, questionSetId int64) (bool, error) {
+	row, err := question_dao.GetQuestionByID(questionId)
+	if err != nil {
+		return false, err
+	}
+	q, err := makeQuestionHelper(row)
+	if err != nil {
+		return false, err
+	}
+	if q.QuestionSetId != questionSetId {
+		return false, nil
+	}
+	return true, nil
 }
 
 func DeleteQuestion(id int64) error {
