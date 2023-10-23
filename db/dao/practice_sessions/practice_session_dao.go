@@ -50,6 +50,7 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
             tx.Rollback()
         } else {
             // All operations were successful, so we commit the transaction
+			fmt.Println()
             err = tx.Commit()
             if err != nil {
                 // Failed to commit the transaction
@@ -79,6 +80,7 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
 			completedAt.Time,
 			practiceSessionId,
 		)
+		fmt.Println(status)
 	} else {
 		_, err = tx.Exec(
 			"UPDATE PracticeSessions SET lastAnsweredQuestionId = $1, status = $2 WHERE id = $3",
@@ -86,6 +88,7 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
 			status,
 			practiceSessionId,
 		)
+		fmt.Println(status)
 	}
 	if err != nil {
 		return errors.Wrap(err, "Failed to update PracticeSession")

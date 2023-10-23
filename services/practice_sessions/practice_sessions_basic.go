@@ -67,6 +67,10 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
 	if ps.ID != practiceSessionId {
 		return errors.New("Practice session id does not exist")
 	}
+	if ps.Status == "completed" {
+		return errors.New("Practice session already completed")
+	}
+
 	questionIdValidate, err := questions.IfQuestionIdExistsInQuestionSet(questionId, questionSetId)
 	if err != nil {
 		return err
@@ -74,21 +78,32 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
 	if !questionIdValidate {
 		return errors.New("Question id does not exist in question set")
 	}
-	if ps.Status == "completed" {
-		return errors.New("Practice session already completed")
-	}
+
 
 	var completedAt sql.NullTime
+
+	// Check if the submitting question is the next question
 	p, err := questions.GetNextQuestion(questionSetId, ps.LastAnsweredQuestionId)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	} else if (p != nil && p.ID != questionId) {
+		// If the submitting question is not the next question, return an error
+		fmt.Println("p.ID: ", p.ID)
+		return errors.New("Question id does not match current question id")
+	}
+	// Passed questionId checks
+	
+	// Check if session is now complete
+	p, err = questions.GetNextQuestion(questionSetId, questionId)
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err.Error())
 		return err
 	} else if err == sql.ErrNoRows {
+		fmt.Println(err.Error())
 		ps.Status = "completed"
 		ps.CompletedAt = time.Now()
 		completedAt = sql.NullTime{Time: ps.CompletedAt, Valid: true}
-	} else if p.ID != questionId {
-		fmt.Println("p.ID: ", p.ID)
-		return errors.New("Question id does not match current question id")
 	}
 	err = dao.CreatePracticeSubmission(userId, questionSetId, practiceSessionId, questionId, videoUrl, ps.Status, completedAt)
 	fmt.Println("hello from practice_sessions_basic.go")
