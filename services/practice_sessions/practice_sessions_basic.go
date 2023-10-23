@@ -19,7 +19,7 @@ func CreatePracticeSession(userId int64, questionSetId int64) error {
 	err := row.Scan(&ps.ID, &ps.UserId, &ps.QuestionSetId, &ps.Status, &ps.LastAnsweredQuestionId, &ps.CompletedAt)
 	if err != nil && err != sql.ErrNoRows {
 		return err
-	} else if err == nil {
+	} else if err == nil && ps.Status == "in_progress" {
 		return errors.New("User and Practice set pair already exists")
 	}
 	ps = models.NewPracticeSession(userId, questionSetId)
