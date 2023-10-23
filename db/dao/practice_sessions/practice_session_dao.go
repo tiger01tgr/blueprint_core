@@ -22,7 +22,7 @@ func CreatePracticeSession(userId int64, questionSetId int64, status string) err
 func GetPracticeSession(userId int64, questionSetId int64) *sql.Row {
 	db := db.GetDB()
 	row := db.QueryRow(
-		"SELECT id, userId, questionSetId, status, lastAnsweredQuestionId, completedAt FROM PracticeSessions WHERE userId = $1 AND questionSetId = $2",
+		"SELECT id, userId, questionSetId, status, lastAnsweredQuestionId, completedAt FROM PracticeSessions WHERE userId = $1 AND questionSetId = $2 AND status = 'in_progress'",
 		userId,
 		questionSetId,
 	)
