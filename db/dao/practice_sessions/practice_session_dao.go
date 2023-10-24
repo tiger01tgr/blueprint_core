@@ -29,6 +29,15 @@ func GetPracticeSession(userId int64, questionSetId int64) *sql.Row {
 	return row
 }
 
+func GetPracticeSessionWithId(sessionId int64) *sql.Row {
+	db := db.GetDB()
+	row := db.QueryRow(
+		"SELECT id, userId, questionSetId, status, lastAnsweredQuestionId, completedAt FROM PracticeSessions WHERE id = $1",
+		sessionId,
+	)
+	return row
+}
+
 func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSessionId int64, questionId int64, videoUrl string, status string, completedAt sql.NullTime) error {
     db := db.GetDB()
 
@@ -95,4 +104,45 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
 	}
 
     return nil // If everything is successful, the defer block will handle the transaction commit
+}
+
+func GetCompletedPracticeSessions(offset int64, limit int64) (*sql.Rows, error) {
+	db := db.GetDB()
+	rows, err := db.Query(
+		`SELECT 
+		id, 
+		userId, 
+		questionSetId, 
+		completedAt 
+		FROM PracticeSessions 
+		WHERE status = 'completed' 
+		ORDER BY completedAt ASC 
+		OFFSET $1 LIMIT $2`,
+		offset,
+		limit,
+	)
+	return rows, err
+}
+
+func GetNumberOfCompletedSessions() (*sql.Row, error) {
+	db := db.GetDB()
+	row := db.QueryRow(
+		`SELECT COUNT(*) FROM PracticeSessions WHERE status = 'completed'`,
+	)
+	return row, nil
+}
+
+func GetCompletedPracticeSessionSubmissions(sessionId int64) (*sql.Rows, error) {
+	db := db.GetDB()
+	rows, err := db.Query(
+		`SELECT
+		id,
+		practiceSessionId,
+		questionId,
+		url
+		FROM PracticeSessionSubmissions
+		WHERE practiceSessionId = $1`,
+		sessionId,
+	)
+	return rows, err
 }

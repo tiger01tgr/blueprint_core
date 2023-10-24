@@ -4,13 +4,14 @@ import (
 	dao "backend/db/dao/practice_sessions"
 	"backend/db/models"
 	"backend/services/questions"
+	"backend/services/s3"
 	"database/sql"
 	"errors"
-	"mime/multipart"
-	"backend/services/s3"
-	"github.com/google/uuid"
-	"time"
 	"fmt"
+	"mime/multipart"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 func CreatePracticeSession(userId int64, questionSetId int64) error {
@@ -55,6 +56,52 @@ func GetPracticeSession(userId int64, questionSetId int64) (*models.PracticeSess
 	return &ps, err
 }
 
+func GetPracticeSessionWithId(sessionId int64) (*models.PracticeSession, error) {
+	row := dao.GetPracticeSessionWithId(sessionId)
+	if row.Err() == sql.ErrNoRows {
+		return nil, errors.New("Practice session does not exist")
+	}
+	var ps models.PracticeSession
+	var lastAnsweredQuestionID sql.NullInt64
+	var completedAt sql.NullTime
+	err := row.Scan(&ps.ID, &ps.UserId, &ps.QuestionSetId, &ps.Status, &lastAnsweredQuestionID, &completedAt)
+	return &ps, err
+}
+
+func GetCompletedPracticeSessions(page int64, limit int64) ([]models.PracticeSession, error) {
+	rows, err := dao.GetCompletedPracticeSessions(page, limit)
+	defer rows.Close()
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	var practiceSessions []models.PracticeSession
+	for rows.Next() {
+		var ps models.PracticeSession
+		var completedAt sql.NullTime
+		err := rows.Scan(&ps.ID, &ps.UserId, &ps.QuestionSetId, &completedAt)
+		if err != nil {
+			fmt.Println(err.Error())
+			return nil, err
+		}
+		if completedAt.Valid {
+			ps.CompletedAt = completedAt.Time
+		}
+		practiceSessions = append(practiceSessions, ps)
+	}
+	return practiceSessions, nil
+}
+
+func GetCompletedPracticeSessionsPagination(limit int64) (int64, error) {
+	row, err := dao.GetNumberOfCompletedSessions()
+	if err != nil {
+		return 0, err
+	}
+	var count int64
+	row.Scan(&count)
+	return (count / limit) + 1, nil
+}
+
 func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSessionId int64, questionId int64, video *multipart.File) error {
 	videoUrl, err := uploadUserSubmissionVideo(video)
 	if err != nil {
@@ -79,7 +126,6 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
 		return errors.New("Question id does not exist in question set")
 	}
 
-
 	var completedAt sql.NullTime
 
 	// Check if the submitting question is the next question
@@ -87,13 +133,13 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
-	} else if (p != nil && p.ID != questionId) {
+	} else if p != nil && p.ID != questionId {
 		// If the submitting question is not the next question, return an error
 		fmt.Println("p.ID: ", p.ID)
 		return errors.New("Question id does not match current question id")
 	}
 	// Passed questionId checks
-	
+
 	// Check if session is now complete
 	p, err = questions.GetNextQuestion(questionSetId, questionId)
 	if err != nil && err != sql.ErrNoRows {
@@ -109,6 +155,27 @@ func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSession
 	fmt.Println("hello from practice_sessions_basic.go")
 	return err
 }
+
+func GetCompletedPracticeSessionSubmissions(sessionId int64) ([]models.PracticeSessionSubmission, error) {
+	rows, err := dao.GetCompletedPracticeSessionSubmissions(sessionId)
+	defer rows.Close()
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	var practiceSessionSubmissions []models.PracticeSessionSubmission
+	for rows.Next() {
+		var ps models.PracticeSessionSubmission
+		err := rows.Scan(&ps.ID, &ps.PracticeSessionId, &ps.QuestionId, &ps.Url)
+		if err != nil {
+			fmt.Println(err.Error())
+			return nil, err
+		}
+		practiceSessionSubmissions = append(practiceSessionSubmissions, ps)
+	}
+	return practiceSessionSubmissions, nil
+}
+
 
 func uploadUserSubmissionVideo(video *multipart.File) (string, error) {
 	uuid := uuid.New()

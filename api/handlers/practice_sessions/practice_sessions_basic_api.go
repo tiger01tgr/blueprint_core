@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"backend/api/middleware"
+	"backend/api/types"
 	sessionsService "backend/services/practice_sessions"
 	"database/sql"
 	"encoding/json"
@@ -17,9 +18,13 @@ import (
 
 func InitSessionsRoutes(router chi.Router) {
 	router.Route("/api/sessions", func(r chi.Router) {
-
 		r.Group(func(r chi.Router) {
 			// middleware.SuperAdminAuth(r)
+			r.Get("/completed", GetCompletedPracticeSessions)
+			r.Get("/completed/{sessionId}", GetCompletedPracticeSession)
+		})
+
+		r.Group(func(r chi.Router) {
 			middleware.UserAuth(r)
 			r.Get("/{questionSetId}", GetPracticeSession)
 			r.Post("/{questionSetId}", CreatePracticeSession)
@@ -171,6 +176,122 @@ func GetPracticeSession(w http.ResponseWriter, r *http.Request) {
 		CompletedAt:            session.CompletedAt,
 	}
 	jsonData, err := json.Marshal(response)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+	return
+}
+
+type CompletedPracticeSession struct {
+	ID            int64     `json:"id"`
+	UserId        int64     `json:"user_id"`
+	QuestionSetId int64     `json:"question_set_id"`
+	CompletedAt   time.Time `json:"completed_at"`
+}
+
+type CompletedPracticeSessionResponse struct {
+	Data       []CompletedPracticeSession `json:"data"`
+	Pagination types.Pagination           `json:"pagination"`
+}
+
+func GetCompletedPracticeSessions(w http.ResponseWriter, r *http.Request) {
+	pageParam := r.FormValue("page")
+	if pageParam == "" {
+		pageParam = "1"
+	}
+	page, err := strconv.ParseInt(pageParam, 10, 64)
+	if err != nil {
+		log.Println(pageParam)
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	limitParam := r.FormValue("limit")
+	if limitParam == "" {
+		limitParam = "20"
+	}
+	limit, err := strconv.ParseInt(limitParam, 10, 64)
+	if err != nil {
+		log.Println(limitParam)
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	sessions, err := sessionsService.GetCompletedPracticeSessions(page, limit)
+	completedSessions := make([]CompletedPracticeSession, len(sessions))
+	for i, session := range sessions {
+		completedSessions[i] = CompletedPracticeSession{
+			ID:            session.ID,
+			UserId:        session.UserId,
+			QuestionSetId: session.QuestionSetId,
+			CompletedAt:   session.CompletedAt,
+		}
+	}
+
+	totalPages, err := sessionsService.GetCompletedPracticeSessionsPagination(limit)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	response := CompletedPracticeSessionResponse{
+		Data: completedSessions,
+		Pagination: types.Pagination{
+			TotalPages:  totalPages,
+			CurrentPage: page,
+			Limit:       limit,
+		},
+	}
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	jsonData, err := json.Marshal(response)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+	return
+}
+
+func GetCompletedPracticeSession(w http.ResponseWriter, r *http.Request) {
+	sessionIdParam := chi.URLParam(r, "sessionId")
+	sessionId, err := strconv.ParseInt(sessionIdParam, 10, 64)
+	if err != nil {
+		log.Println(sessionIdParam)
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	submissions, err := sessionsService.GetCompletedPracticeSessionSubmissions(sessionId)
+	if err == sql.ErrNoRows {
+		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Practice session not found"))
+		return
+	}
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	jsonData, err := json.Marshal(submissions)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
