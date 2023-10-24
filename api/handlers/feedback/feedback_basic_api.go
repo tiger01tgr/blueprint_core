@@ -5,6 +5,7 @@ import (
 	// "backend/api/types"
 	feedbackService "backend/services/feedback"
 	"backend/utils"
+
 	// "database/sql"
 	"encoding/json"
 	"log"
@@ -27,7 +28,8 @@ func InitFeedbackRoutes(router chi.Router) {
 
 		r.Group(func(r chi.Router) {
 			middleware.UserAuth(r)
-			r.Get("/", GetFeedback)
+			r.Get("/", GetAllFeedback)
+			r.Get("/{feedbackId}", GetFeedbackEntries)
 		})
 	})
 }
@@ -61,9 +63,6 @@ func PostFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	submissionIdsInt := utils.ConvertStringToInt64Array(strings.Join(submissionIds, ","))
-	log.Println(submissionIdsInt)
-	log.Println(feedback)
-	log.Println(sessionId)
 
 	// Create feedback
 	err = feedbackService.CreateFeedback(sessionId, submissionIdsInt, feedback)
@@ -75,12 +74,12 @@ func PostFeedback(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func GetFeedback(w http.ResponseWriter, r *http.Request) {
+func GetAllFeedback(w http.ResponseWriter, r *http.Request) {
 	// Get user id
 	userId := r.Context().Value("id").(int64)
 
 	// Get feedback
-	feedback, err := feedbackService.GetFeedback(userId)
+	feedback, err := feedbackService.GetAllFeedback(userId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -96,5 +95,36 @@ func GetFeedback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Write the response
+	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)
+}
+
+func GetFeedbackEntries(w http.ResponseWriter, r *http.Request) {
+	feedbackIdParam := chi.URLParam(r, "feedbackId")
+	feedbackId, err := strconv.ParseInt(feedbackIdParam, 10, 64)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// Get user id
+	userId := r.Context().Value("id").(int64)
+
+	// Get feedback
+	feedbackEntries, err := feedbackService.GetFeedbackEntries(userId, feedbackId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	jsonData, err := json.Marshal(feedbackEntries)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+	go feedbackService.MarkFeedbackAsRead(feedbackId)
 }

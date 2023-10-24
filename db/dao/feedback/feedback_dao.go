@@ -2,39 +2,93 @@ package dao
 
 import (
 	"backend/db"
-	"github.com/lib/pq"
 	// "backend/db/models"
 	"database/sql"
 	// "fmt"
-	// "log"
+	"log"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 func CreateFeedback(userId int64, questionSetId int64, practiceSessionId int64, questionIds []int64, videoUrls []string, feedbacks []string, created_at time.Time, seen bool) error {
-    db := db.GetDB()
-    tx, err := db.Begin()
+	db := db.GetDB()
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	// Defer a function to handle the transaction based on the success or failure of the operations
+	defer func() {
+		if p := recover(); p != nil {
+			// A panic occurred, so we should rollback the transaction
+			log.Println("Panic occurred 1")
+			tx.Rollback()
+		} else if err != nil {
+			// An error occurred, so we should rollback the transaction
+			log.Println("Panic occurred 2")
+			tx.Rollback()
+		} else {
+			// All operations were successful, so we commit the transaction
+			err = tx.Commit()
+			if err != nil {
+				// Failed to commit the transaction
+				log.Println("Panic occurred 3")
+				err = errors.Wrap(err, "Failed to commit transaction")
+			}
+			log.Println("Success!")
+		}
+	}()
+
+    // Insert into Feedback
+	var feedbackID int64
+	err = tx.QueryRow("INSERT INTO Feedback (userId, questionSetId, practiceSessionId, created_at, seen) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		userId, questionSetId, practiceSessionId, created_at, seen).Scan(&feedbackID)
+	if err != nil {
+		return errors.Wrap(err, "Failed to insert into Feedback or returning id")
+	}
+
+    // Insert into FeedbackEntries
+	for i := range questionIds {
+		_, err = tx.Exec("INSERT INTO FeedbackEntries (feedbackId, questionId, videoUrl, feedbackText) VALUES ($1, $2, $3, $4)",
+			feedbackID, questionIds[i], videoUrls[i], feedbacks[i])
+		if err != nil {
+			return errors.Wrap(err, "Failed to insert into FeedbackEntries")
+		}
+	}
+
+    // Mark practice session as closed
+    _, err = tx.Exec("UPDATE PracticeSessions SET status = 'closed' WHERE id = $1", practiceSessionId)
     if err != nil {
-        return err
+        return errors.Wrap(err, "Failed to update PracticeSessions")
     }
 
-    stmt, err := tx.Prepare("INSERT INTO Feedback (userId, questionSetId, practiceSessionId, questionIds, videoUrls, feedbacks, created_at, seen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
-    if err != nil {
-        return err
-    }
-    defer stmt.Close()
+	return nil // If everything is successful, the defer block will handle the transaction commit
 
-    _, err = stmt.Exec(userId, questionSetId, practiceSessionId, pq.Array(questionIds), pq.Array(videoUrls), pq.Array(feedbacks), created_at, seen)
-    if err != nil {
-        tx.Rollback()
-        return err
-    }
-
-    err = tx.Commit()
-    return err
 }
 
-func GetFeedback(userId int64) (*sql.Rows, error){
+func GetAllFeedback(userId int64) (*sql.Rows, error) {
 	db := db.GetDB()
-	rows, err := db.Query("SELECT id, userId, questionSetId, practiceSessionId, questionIds, videoUrls, feedbacks, created_at, seen FROM Feedback WHERE userId = $1", userId)
+	rows, err := db.Query("SELECT id, userId, questionSetId, practiceSessionId, created_at, seen FROM Feedback WHERE userId = $1", userId)
 	return rows, err
+}
+
+func GetFeedback(feedbackId int64) (*sql.Row, error) {
+	db := db.GetDB()
+	row := db.QueryRow("SELECT id, userId, questionSetId, practiceSessionId, created_at, seen FROM Feedback WHERE id = $1", feedbackId)
+	return row, nil
+}
+
+func GetFeedbackEntries(feedbackId int64) (*sql.Rows, error) {
+	db := db.GetDB()
+	rows, err := db.Query("SELECT id, feedbackId, questionId, videoUrl, feedbackText FROM FeedbackEntries WHERE feedbackId = $1", feedbackId)
+	return rows, err
+}
+
+func MarkFeedbackAsRead(feedbackId int64) error {
+	db := db.GetDB()
+	_, err := db.Exec(
+		"UPDATE Feedback SET seen = true WHERE id = $1",
+		feedbackId,
+	)
+	return err
 }
