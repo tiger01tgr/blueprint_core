@@ -68,7 +68,23 @@ func CreateFeedback(userId int64, questionSetId int64, practiceSessionId int64, 
 
 func GetAllFeedback(userId int64) (*sql.Rows, error) {
 	db := db.GetDB()
-	rows, err := db.Query("SELECT id, userId, questionSetId, practiceSessionId, created_at, seen FROM Feedback WHERE userId = $1", userId)
+	rows, err := db.Query(
+		`SELECT 
+			Feedback.id, 
+			Feedback.userId, 
+			Feedback.questionSetId, 
+			Feedback.practiceSessionId, 
+			Feedback.created_at, 
+			Feedback.seen,
+			Employers.name AS employer_name,
+    		Employers.logo AS employer_logo,
+    		QuestionSets.name AS questionset_name
+			FROM Feedback
+			JOIN QuestionSets ON Feedback.questionSetId = QuestionSets.id
+			JOIN Employers ON QuestionSets.employerId = Employers.id
+			WHERE userId = $1 
+			ORDER BY created_at ASC`,
+			userId)
 	return rows, err
 }
 
@@ -80,7 +96,19 @@ func GetFeedback(feedbackId int64) (*sql.Row, error) {
 
 func GetFeedbackEntries(feedbackId int64) (*sql.Rows, error) {
 	db := db.GetDB()
-	rows, err := db.Query("SELECT id, feedbackId, questionId, videoUrl, feedbackText FROM FeedbackEntries WHERE feedbackId = $1", feedbackId)
+	rows, err := db.Query(`
+		SELECT 
+			FeedbackEntries.id, 
+			FeedbackEntries.feedbackId, 
+			FeedbackEntries.questionId, 
+			FeedbackEntries.videoUrl, 
+			FeedbackEntries.feedbackText,
+			Questions.text as question_text,
+			Questions.timeLimit as question_time_limit
+		FROM FeedbackEntries 
+		JOIN Questions ON FeedbackEntries.questionId = Questions.id
+		WHERE feedbackId = $1`, 
+		feedbackId)
 	return rows, err
 }
 

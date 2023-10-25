@@ -28,7 +28,7 @@ func GetQuestionByID(id int64) (*sql.Row, error) {
 
 func GetQuestionsByQuestionSetID(questionSetID int64) (*sql.Rows, error) {
 	db := db.GetDB()
-	rows, err := db.Query("SELECT id, questionSetId, text, timelimit FROM Questions WHERE questionSetId = $1", questionSetID)
+	rows, err := db.Query("SELECT id, questionSetId, text, timelimit FROM Questions WHERE questionSetId = $1 ORDER BY id ASC", questionSetID)
 	if err != nil {
 		return nil, err
 	}

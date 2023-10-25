@@ -57,7 +57,7 @@ func GetAllFeedback(userId int64) ([]models.Feedback, error) {
 	var feedbacks []models.Feedback
 	for feedback.Next() {
 		var fb models.Feedback
-		err := feedback.Scan(&fb.ID, &fb.UserId, &fb.QuestionSetId, &fb.PracticeSessionId, &fb.CreatedAt, &fb.Seen)
+		err := feedback.Scan(&fb.ID, &fb.UserId, &fb.QuestionSetId, &fb.PracticeSessionId, &fb.CreatedAt, &fb.Seen, &fb.QuestionSetName, &fb.EmployerName, &fb.EmployerLogo)
 		if err != nil {
 			log.Println(err.Error())
 			return nil, err
@@ -107,7 +107,7 @@ func GetFeedbackEntries(userId int64, feedbackId int64) ([]models.FeedbackEntrie
 	var feedbackEntries []models.FeedbackEntries
 	for rows.Next() {
 		var fb models.FeedbackEntries
-		err := rows.Scan(&fb.ID, &fb.FeedbackId, &fb.QuestionId, &fb.VideoUrl, &fb.Feedback)
+		err := rows.Scan(&fb.ID, &fb.FeedbackId, &fb.QuestionId, &fb.VideoUrl, &fb.Feedback, &fb.QuestionText, &fb.TimeLimit)
 		if err != nil {
 			log.Println(err.Error())
 			return nil, err
