@@ -2,6 +2,7 @@ package practicesessions
 
 import (
 	dao "backend/db/dao/practice_sessions"
+	questionsService "backend/services/questions"
 	"backend/db/models"
 	"backend/services/questions"
 	"backend/services/s3"
@@ -69,7 +70,8 @@ func GetPracticeSessionWithId(sessionId int64) (*models.PracticeSession, error) 
 }
 
 func GetCompletedPracticeSessions(page int64, limit int64) ([]models.PracticeSession, error) {
-	rows, err := dao.GetCompletedPracticeSessions(page, limit)
+	offset := (page - 1) * limit
+	rows, err := dao.GetCompletedPracticeSessions(offset, limit)
 	defer rows.Close()
 	if err != nil {
 		fmt.Println(err.Error())
@@ -92,14 +94,14 @@ func GetCompletedPracticeSessions(page int64, limit int64) ([]models.PracticeSes
 	return practiceSessions, nil
 }
 
-func GetCompletedPracticeSessionsPagination(limit int64) (int64, error) {
+func GetCompletedPracticeSessionsPagination(limit int64) (int64, int64, error) {
 	row, err := dao.GetNumberOfCompletedSessions()
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	var count int64
 	row.Scan(&count)
-	return (count / limit) + 1, nil
+	return count, (count / limit) + 1, nil
 }
 
 func CreatePracticeSubmission(userId int64, questionSetId int64, practiceSessionId int64, questionId int64, video *multipart.File) error {
@@ -171,6 +173,9 @@ func GetCompletedPracticeSessionSubmissions(sessionId int64) ([]models.PracticeS
 			fmt.Println(err.Error())
 			return nil, err
 		}
+		question, err := questionsService.GetQuestionWithId(ps.QuestionId)
+		ps.QuestionText = question.Text
+		ps.TimeLimit = question.TimeLimit
 		practiceSessionSubmissions = append(practiceSessionSubmissions, ps)
 	}
 	return practiceSessionSubmissions, nil

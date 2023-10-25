@@ -28,7 +28,7 @@ func InitFeedbackRoutes(router chi.Router) {
 
 		r.Group(func(r chi.Router) {
 			middleware.UserAuth(r)
-			r.Get("/", GetAllFeedback)
+			r.Get("/", GetAllFeedbackByUserId)
 			r.Get("/{feedbackId}", GetFeedbackEntries)
 		})
 	})
@@ -74,7 +74,7 @@ func PostFeedback(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func GetAllFeedback(w http.ResponseWriter, r *http.Request) {
+func GetAllFeedbackByUserId(w http.ResponseWriter, r *http.Request) {
 	// Get user id
 	userId := r.Context().Value("id").(int64)
 

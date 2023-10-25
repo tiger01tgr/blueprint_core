@@ -235,7 +235,7 @@ func GetCompletedPracticeSessions(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	totalPages, err := sessionsService.GetCompletedPracticeSessionsPagination(limit)
+	totalResults, totalPages, err := sessionsService.GetCompletedPracticeSessionsPagination(limit)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -248,6 +248,7 @@ func GetCompletedPracticeSessions(w http.ResponseWriter, r *http.Request) {
 			TotalPages:  totalPages,
 			CurrentPage: page,
 			Limit:       limit,
+			TotalResults: totalResults,
 		},
 	}
 	if err != nil {
