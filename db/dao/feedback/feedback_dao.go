@@ -76,9 +76,9 @@ func GetAllFeedback(userId int64) (*sql.Rows, error) {
 			Feedback.practiceSessionId, 
 			Feedback.created_at, 
 			Feedback.seen,
+			QuestionSets.name AS questionset_name,
 			Employers.name AS employer_name,
-    		Employers.logo AS employer_logo,
-    		QuestionSets.name AS questionset_name
+    		Employers.logo AS employer_logo
 			FROM Feedback
 			JOIN QuestionSets ON Feedback.questionSetId = QuestionSets.id
 			JOIN Employers ON QuestionSets.employerId = Employers.id
