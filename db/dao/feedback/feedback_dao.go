@@ -39,7 +39,7 @@ func CreateFeedback(userId int64, questionSetId int64, practiceSessionId int64, 
 		}
 	}()
 
-    // Insert into Feedback
+	// Insert into Feedback
 	var feedbackID int64
 	err = tx.QueryRow("INSERT INTO Feedback (userId, questionSetId, practiceSessionId, created_at, seen) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		userId, questionSetId, practiceSessionId, created_at, seen).Scan(&feedbackID)
@@ -47,7 +47,7 @@ func CreateFeedback(userId int64, questionSetId int64, practiceSessionId int64, 
 		return errors.Wrap(err, "Failed to insert into Feedback or returning id")
 	}
 
-    // Insert into FeedbackEntries
+	// Insert into FeedbackEntries
 	for i := range questionIds {
 		_, err = tx.Exec("INSERT INTO FeedbackEntries (feedbackId, questionId, videoUrl, feedbackText) VALUES ($1, $2, $3, $4)",
 			feedbackID, questionIds[i], videoUrls[i], feedbacks[i])
@@ -56,11 +56,11 @@ func CreateFeedback(userId int64, questionSetId int64, practiceSessionId int64, 
 		}
 	}
 
-    // Mark practice session as closed
-    _, err = tx.Exec("UPDATE PracticeSessions SET status = 'closed' WHERE id = $1", practiceSessionId)
-    if err != nil {
-        return errors.Wrap(err, "Failed to update PracticeSessions")
-    }
+	// Mark practice session as closed
+	_, err = tx.Exec("UPDATE PracticeSessions SET status = 'closed' WHERE id = $1", practiceSessionId)
+	if err != nil {
+		return errors.Wrap(err, "Failed to update PracticeSessions")
+	}
 
 	return nil // If everything is successful, the defer block will handle the transaction commit
 
@@ -77,6 +77,7 @@ func GetAllFeedback(userId int64) (*sql.Rows, error) {
 			Feedback.created_at, 
 			Feedback.seen,
 			QuestionSets.name AS questionset_name,
+			QuestionSets.interviewType as interview_type,
 			Employers.name AS employer_name,
     		Employers.logo AS employer_logo
 			FROM Feedback
@@ -84,7 +85,7 @@ func GetAllFeedback(userId int64) (*sql.Rows, error) {
 			JOIN Employers ON QuestionSets.employerId = Employers.id
 			WHERE userId = $1 
 			ORDER BY created_at ASC`,
-			userId)
+		userId)
 	return rows, err
 }
 
@@ -107,7 +108,7 @@ func GetFeedbackEntries(feedbackId int64) (*sql.Rows, error) {
 			Questions.timeLimit as question_time_limit
 		FROM FeedbackEntries 
 		JOIN Questions ON FeedbackEntries.questionId = Questions.id
-		WHERE feedbackId = $1`, 
+		WHERE feedbackId = $1`,
 		feedbackId)
 	return rows, err
 }

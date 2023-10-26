@@ -7,6 +7,7 @@ type Feedback struct {
 	UserId            int64     `json:"user_id"`
 	QuestionSetId     int64     `json:"question_set_id"`
 	QuestionSetName   string    `json:"question_set_name"`
+	QuestionSetType   string    `json:"question_set_type"`
 	PracticeSessionId int64     `json:"practice_session_id"`
 	EmployerName      string    `json:"employer_name"`
 	EmployerLogo      string    `json:"employer_logo"`

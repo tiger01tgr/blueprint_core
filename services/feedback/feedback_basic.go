@@ -57,7 +57,7 @@ func GetAllFeedback(userId int64) ([]models.Feedback, error) {
 	var feedbacks []models.Feedback
 	for feedback.Next() {
 		var fb models.Feedback
-		err := feedback.Scan(&fb.ID, &fb.UserId, &fb.QuestionSetId, &fb.PracticeSessionId, &fb.CreatedAt, &fb.Seen, &fb.QuestionSetName, &fb.EmployerName, &fb.EmployerLogo)
+		err := feedback.Scan(&fb.ID, &fb.UserId, &fb.QuestionSetId, &fb.PracticeSessionId, &fb.CreatedAt, &fb.Seen, &fb.QuestionSetName, &fb.QuestionSetType, &fb.EmployerName, &fb.EmployerLogo)
 		if err != nil {
 			log.Println(err.Error())
 			return nil, err
