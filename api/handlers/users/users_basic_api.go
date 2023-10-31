@@ -5,8 +5,8 @@ import (
 	"backend/services/user"
 	"encoding/json"
 	"log"
-	"net/http"
 	"mime/multipart"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -18,6 +18,7 @@ func InitUsersRoutes(router chi.Router) {
 
 		// Admin Routes
 		// r.Get("/", GetUser)
+		r.Post("/", CreateUser)
 
 		// User Routes
 		r.Group(func(r chi.Router) {
@@ -25,7 +26,6 @@ func InitUsersRoutes(router chi.Router) {
 			r.Get("/me", GetUserWithSelf)
 			r.Get("/me/profile", GetUserProfileWithSelf)
 			r.Patch("/me/profile", PatchUserProfile)
-			r.Post("/", CreateUser)
 		})
 	})
 }
@@ -168,7 +168,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func PatchUserProfile(w http.ResponseWriter,  r *http.Request) {
+func PatchUserProfile(w http.ResponseWriter, r *http.Request) {
 	var resume *multipart.File
 	if r.FormValue("isResumeUpdate") == "true" {
 		err := r.ParseMultipartForm(10 << 20) // 10 MB maximum file size
